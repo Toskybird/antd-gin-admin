@@ -1,0 +1,16 @@
+package interfaces
+
+import (
+	"context"
+
+	"antd-gin-admin-backend/internal/model/dto"
+	"antd-gin-admin-backend/internal/model/entity"
+	"antd-gin-admin-backend/internal/model/vo"
+)
+
+// OperationLogService defines operations for operation logs.
+type OperationLogService interface {
+	Create(ctx context.Context, log *entity.OperationLog) error
+	Page(ctx context.Context, req *dto.OperationLogPageRequest) (*vo.PageResult[vo.OperationLogVO], error)
+	PageWithScope(ctx context.Context, req *dto.OperationLogPageRequest, scope *UserDataScope) (*vo.PageResult[vo.OperationLogVO], error)
+}

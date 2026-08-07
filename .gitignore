@@ -1,0 +1,44 @@
+.DS_Store
+
+.idea/
+.cursor/
+
+# dependencies
+node_modules/
+**/node_modules/
+
+# build output
+dist/
+build/
+target/
+coverage/
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# local env
+.env
+.env.local
+.env.*.local
+
+# editor
+.vscode/
+
+# umi
+.umi/
+.umi-production/
+.umi-test/
+**/.umi/
+**/.umi-production/
+**/.umi-test/
+
+# docusaurus
+.docusaurus/
+**/.docusaurus/
+
+# reference frontend (separate nested git repo, not part of publish)
+frontend/web_react_code/

@@ -1,0 +1,20 @@
+package interfaces
+
+import (
+	"context"
+
+	"antd-gin-admin-backend/internal/model/dto"
+	"antd-gin-admin-backend/internal/model/entity"
+)
+
+// UserService defines user-related operations.
+type UserService interface {
+	GetByCode(ctx context.Context, userCode string) (*entity.User, error)
+	List(ctx context.Context, page, pageSize int) ([]*entity.User, int64, error)
+	ListWithScope(ctx context.Context, page, pageSize int, scope *UserDataScope) ([]*entity.User, int64, error)
+	Create(ctx context.Context, req *dto.CreateUserRequest) (*entity.User, error)
+	Update(ctx context.Context, userCode string, req *dto.UpdateUserRequest) (*entity.User, error)
+	UpdateProfile(ctx context.Context, userCode string, req *dto.UpdateProfileRequest) (*entity.User, error)
+	ChangePassword(ctx context.Context, userCode string, req *dto.ChangePasswordRequest) error
+	Delete(ctx context.Context, userCode string) error
+}

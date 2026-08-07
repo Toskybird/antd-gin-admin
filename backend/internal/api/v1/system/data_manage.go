@@ -1,0 +1,116 @@
+package system
+
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+
+	"antd-gin-admin-backend/internal/middleware"
+	"antd-gin-admin-backend/internal/model/dto"
+	"antd-gin-admin-backend/internal/model/vo"
+	"antd-gin-admin-backend/internal/service/interfaces"
+	"antd-gin-admin-backend/pkg/response"
+)
+
+// registerDataManageRoutes registers data management (DB metadata) routes.
+func registerDataManageRoutes(rg *gin.RouterGroup, svc interfaces.DataManageService) {
+	if svc == nil {
+		return
+	}
+
+	rg.POST("/data/login", middleware.RequireSuperAdmin(), func(c *gin.Context) {
+		loginDataMonitor(c, svc)
+	})
+
+	// 列出所有表
+	rg.GET("/data/tables", middleware.RequireSuperAdmin(), func(c *gin.Context) {
+		listTables(c, svc)
+	})
+
+	// 列出指定表的字段
+	rg.GET("/data/tables/:table/columns", middleware.RequireSuperAdmin(), func(c *gin.Context) {
+		listTableColumns(c, svc)
+	})
+
+	// 分页查询指定表的数据
+	rg.GET("/data/tables/:table/rows", middleware.RequireSuperAdmin(), func(c *gin.Context) {
+		listTableRows(c, svc)
+	})
+}
+
+func loginDataMonitor(c *gin.Context, svc interfaces.DataManageService) {
+	var req dto.DataLoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "参数错误")
+		return
+	}
+	if !svc.VerifyCredential(c, req.Username, req.Password) {
+		response.Error(c, http.StatusUnauthorized, "数据库用户名或密码错误")
+		return
+	}
+	response.Success(c, gin.H{"authenticated": true})
+}
+
+func listTables(c *gin.Context, svc interfaces.DataManageService) {
+	items, err := svc.ListTables(c)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if items == nil {
+		items = []*vo.TableMetaVO{}
+	}
+	response.Success(c, items)
+}
+
+// listTableRows returns paginated rows for a given table.
+func listTableRows(c *gin.Context, svc interfaces.DataManageService) {
+	table := c.Param("table")
+	if table == "" {
+		response.Error(c, http.StatusBadRequest, "表名不能为空")
+		return
+	}
+	pageStr := c.DefaultQuery("page", "1")
+	sizeStr := c.DefaultQuery("page_size", "10")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+	size, err := strconv.Atoi(sizeStr)
+	if err != nil {
+		size = 10
+	}
+
+	result, err := svc.PageTableData(c, table, page, size)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if result == nil {
+		result = &vo.TableDataPageVO{
+			Items: []map[string]interface{}{},
+			Page:  page,
+			Size:  size,
+			Total: 0,
+		}
+	}
+	response.Success(c, result)
+}
+
+func listTableColumns(c *gin.Context, svc interfaces.DataManageService) {
+	table := c.Param("table")
+	if table == "" {
+		response.Error(c, http.StatusBadRequest, "表名不能为空")
+		return
+	}
+	items, err := svc.ListColumns(c, table)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if items == nil {
+		items = []*vo.ColumnMetaVO{}
+	}
+	response.Success(c, items)
+}

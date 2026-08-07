@@ -1,0 +1,306 @@
+@font-face {
+  font-family: "AlibabaSans";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("//mdn.alipayobjects.com/huamei_iwk9zp/afts/file/A*1GSgSYDD_aIAAAAAQsAAAAgAegCCAQ/AlibabaSans-Light.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "AlibabaSans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("//mdn.alipayobjects.com/huamei_iwk9zp/afts/file/A*2zEUQqnPNesAAAAAQtAAAAgAegCCAQ/AlibabaSans-Regular.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "AlibabaSans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("//mdn.alipayobjects.com/huamei_iwk9zp/afts/file/A*E_cxRbMlZqUAAAAAQuAAAAgAegCCAQ/AlibabaSans-Medium.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "AlibabaSans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("//mdn.alipayobjects.com/huamei_iwk9zp/afts/file/A*E_cxRbMlZqUAAAAAQuAAAAgAegCCAQ/AlibabaSans-Bold.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "AlibabaSans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("//mdn.alipayobjects.com/huamei_iwk9zp/afts/file/A*E_cxRbMlZqUAAAAAQuAAAAgAegCCAQ/AlibabaSans-Heavy.woff2")
+    format("woff2");
+}
+
+/* 原生 <a> 跟随 antd cssVar 链接色（与 colorLink / colorPrimary 对齐） */
+a {
+  color: var(--ant-color-link);
+}
+a:hover {
+  color: var(--ant-color-link-hover);
+}
+
+[data-theme='night'] {
+  --main-bg-color: rgb(15, 18, 20);
+  --main-content-color: rgb(21, 25, 33);
+  --sec-font-color: rgba(199, 221, 255, 0.45);
+  --main-font-color: rgba(199, 221, 255, 0.85);
+  --third-font-color: rgba(199, 221, 255, 0.58);
+  --main-border-color: #43434385;
+  --sec-border-color: #434343;
+  --sider-color: rgb(15, 18, 20);
+  --sider-font-color: rgba(199, 221, 255, 0.85);
+  --tag-default-color: #43434385;
+  --font-color: rgba(199, 221, 255, 0.85);
+  --orange-bg-color: #2b1611;
+  --orange-font-color: #e87040;
+  --orange-border-color: #592716;
+  --orange-border--hover: #59271686;
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    background: rgba(67, 67, 67, 0.1);
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(67, 67, 67, 0.05);
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #434343 0%, #5a5a5a 100%);
+    border-radius: 5px;
+  }
+
+  .ant-empty-img-simple g,
+  .ant-empty-img-simple-g,
+  .ant-empty-img-simple-ellipse,
+  .ant-empty-img-simple-path {
+    fill: #313841;
+    stroke: rgba(106, 117, 136, 0.45);
+  }
+
+  .ant-spin-blur::after {
+    opacity: 0.15;
+  }
+  .ant-btn-dashed {
+    border-color: var(--sec-border-color);
+  }
+
+  .ant-select-item-option-active:not(.ant-select-item-option-disabled),
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background-color: var(--main-border-color);
+  }
+
+  .ant-pro-sider-collapsed-button {
+    color: rgba(199, 221, 255, 0.85);
+    background: #242b38;
+  }
+  .ant-tag,
+  .ant-steps-item-wait .ant-steps-item-icon {
+    color: rgba(199, 221, 255, 0.85);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--sec-border-color);
+  }
+
+  .ant-pro-layout .ant-pro-layout-content {
+    padding-block: 16px;
+    padding-inline: 24px;
+  }
+  .ant-breadcrumb a,
+  .ant-breadcrumb,
+  .ant-breadcrumb-separator {
+    color: var(--sec-font-color);
+  }
+  .ant-card-bordered {
+    border: 1px solid var(--main-border-color);
+  }
+  .ant-pro-layout .ant-pro-sider .ant-layout-sider-children {
+    border-inline-end: 1px solid var(--main-border-color);
+  }
+  .ant-table-tbody > tr > td,
+  .ant-card-head,
+  .ant-tabs-top > .ant-tabs-nav::before,
+  .ant-pro-layout .ant-layout-header.ant-pro-layout-header {
+    border-bottom: 1px solid var(--main-border-color);
+  }
+  .ant-form-item-label > label,
+  .ant-pagination,
+  .ant-select-selection-item,
+  .ant-typography,
+  .ant-btn-default,
+  .ant-tabs,
+  .ant-descriptions-item-label,
+  .ant-descriptions-item-content,
+  .ant-empty-description {
+    color: var(--main-font-color) !important;
+  }
+  .ant-pagination-item,
+  .ant-select:not(.ant-select-customize-input) .ant-select-selector,
+  .ant-btn-default,
+  .ant-input-affix-wrapper,
+  .ant-input {
+    background-color: transparent;
+    border: 1px solid var(--sec-border-color);
+  }
+  .ant-table,
+  .ant-pro-card,
+  .ant-pro-table .ant-pro-table-search {
+    background: var(--main-content-color);
+
+    .ant-table-thead > tr > th {
+      background: #1c212a;
+      color: var(--main-font-color);
+    }
+
+    .ant-table-tbody > tr > td {
+      background: var(--main-content-color);
+      color: var(--main-font-color);
+    }
+  }
+  .ant-table-tbody > tr.ant-table-row:hover > td,
+  .ant-table-tbody > tr > td.ant-table-cell-row-hover {
+    background: #1c212a !important;
+  }
+
+  .ant-modal-content,
+  .ant-modal-header,
+  .ant-card-body,
+  .ant-card-head,
+  .ant-card,
+  .ant-select-dropdown {
+    background: var(--main-content-color);
+    color: var(--main-font-color) !important;
+  }
+
+  .ant-modal-header {
+    border-bottom: 1px solid var(--sec-border-color);
+  }
+  .ant-modal-title {
+    color: var(--main-font-color);
+  }
+}
+
+[data-theme='dark'] {
+  --main-bg-color: #fff;
+  --main-font-color: rgba(0, 0, 0, 0.85);
+  --sec-font-color: rgba(0, 0, 0, 0.45);
+  --third-font-color: rgba(0, 0, 0, 0.58);
+  --main-border-color: #f0f0f0;
+  --sider-color: #001529;
+  --sider-font-color: rgba(255, 255, 255, 0.8);
+  --font-color: rgba(255, 255, 255, 0.8);
+  --tag-default-color: #fafafa;
+  --orange-bg-color: rgb(250, 140, 22);
+  --orange-font-color: #fff;
+  --orange-border-color: rgb(250, 140, 22);
+  --orange-border--hover: rgb(246, 174, 96);
+}
+
+[data-theme='default'] {
+  --main-bg-color: #fff;
+  --main-font-color: rgba(0, 0, 0, 0.85);
+  --sec-font-color: rgba(0, 0, 0, 0.45);
+  --third-font-color: rgba(0, 0, 0, 0.58);
+  --main-border-color: #f0f0f0;
+  --sider-color: #001529;
+  --sider-font-color: rgba(255, 255, 255, 0.8);
+  --font-color: rgba(255, 255, 255, 0.8);
+  --tag-default-color: #fafafa;
+  --orange-bg-color: rgb(250, 140, 22);
+  --orange-font-color: #fff;
+  --orange-border-color: rgb(250, 140, 22);
+  --orange-border--hover: rgb(246, 174, 96);
+}
+
+[data-theme='light'] {
+  --main-bg-color: #fff;
+  --main-font-color: rgba(0, 0, 0, 0.85);
+  --sec-font-color: rgba(0, 0, 0, 0.45);
+  --third-font-color: rgba(0, 0, 0, 0.58);
+  --main-border-color: #f0f0f0;
+  --sider-color: #001529;
+  --sider-font-color: rgba(255, 255, 255, 0.8);
+  --font-color: rgba(0, 0, 0, 0.85);
+  --tag-default-color: #fafafa;
+  --orange-bg-color: rgb(250, 140, 22);
+  --orange-font-color: #fff;
+  --orange-border-color: rgb(250, 140, 22);
+  --orange-border--hover: rgb(246, 174, 96);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family:
+    AlibabaSans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  color: var(--main-font-color, rgba(0, 0, 0, 0.85));
+}
+
+.colorWeak {
+  filter: invert(80%);
+}
+
+.ant-layout {
+  min-height: 100vh;
+}
+.ant-pro-sider.ant-layout-sider.ant-pro-sider-fixed {
+  left: unset;
+}
+
+canvas {
+  display: block;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+@media (max-width: 768px) {
+  .ant-table {
+    width: 100%;
+    overflow-x: auto;
+    &-thead > tr,
+    &-tbody > tr {
+      > th,
+      > td {
+        white-space: pre;
+        > span {
+          display: block;
+        }
+      }
+    }
+  }
+}
+
+html:not([data-theme='light'])
+  .ant-menu-light.ant-menu-submenu-popup
+  > .ant-menu:not(.ant-dropdown-menu) {
+  background-color: #001529 !important;
+}
+
+.ant-card .ant-card-head {
+  font-weight: 500;
+}
+.ant-table-wrapper .ant-table-thead > tr > th {
+  font-weight: 500;
+}

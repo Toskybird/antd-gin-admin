@@ -1,0 +1,194 @@
+// https://umijs.org/config/
+
+import { join } from 'node:path';
+import { defineConfig } from '@umijs/max';
+import zhCN from 'antd/locale/zh_CN';
+import defaultSettings from './defaultSettings';
+import proxy from './proxy';
+import routes from './routes';
+const { REACT_APP_ENV = 'dev', PUBLIC_PATH: ENV_PUBLIC_PATH, REACT_APP_API_BASE_URL } = process.env;
+
+/**
+ * @name 使用公共路径
+ * @description 部署时的路径，如果部署在非根目录下，需要配置这个变量
+ *              默认值为 '/'，以保证本地开发和 docker-compose 部署保持根路径不变。
+ *              在 GitHub Pages 等场景下，可以通过设置环境变量 PUBLIC_PATH 覆盖为 '/antd-gin-admin/'。
+ * @doc https://umijs.org/docs/api/config#publicpath
+ */
+const PUBLIC_PATH: string = ENV_PUBLIC_PATH || '/';
+const config: ReturnType<typeof defineConfig> = defineConfig({
+  /**
+   * @name 定义全局变量
+   * @description 在构建时注入环境变量，可以在代码中使用 process.env.REACT_APP_API_BASE_URL
+   * @doc https://umijs.org/docs/api/config#define
+   */
+  define: {
+    'process.env.REACT_APP_API_BASE_URL': REACT_APP_API_BASE_URL || '',
+    'process.env.NODE_ENV': process.env.NODE_ENV || 'development',
+    'process.env.PUBLIC_PATH': JSON.stringify(PUBLIC_PATH),
+  },
+  /**
+   * @name 开启 hash 模式
+   * @description 让 build 之后的产物包含 hash 后缀。通常用于增量发布和避免浏览器加载缓存。
+   * @doc https://umijs.org/docs/api/config#hash
+   */
+  hash: true,
+  /**
+   * @name 路由与静态资源的基准路径
+   * @description base / publicPath 都使用同一个 PUBLIC_PATH
+   *              本地和 docker-compose 默认是 '/'；
+   *              GitHub Pages 通过环境变量设置为 '/antd-gin-admin/'。
+   */
+  base: PUBLIC_PATH,
+  publicPath: PUBLIC_PATH,
+  /**
+   * @name 兼容性设置
+   * @description 设置 ie11 不一定完美兼容，需要检查自己使用的所有依赖
+   * @doc https://umijs.org/docs/api/config#targets
+   */
+  // targets: {
+  //   ie: 11,
+  // },
+  /**
+   * @name 路由的配置，不在路由中引入的文件不会编译
+   * @description 只支持 path，component，routes，redirect，wrappers，title 的配置
+   * @doc https://umijs.org/docs/guides/routes
+   */
+  // umi routes: https://umijs.org/docs/routing
+  routes,
+  /**
+   * @name 主题的配置
+   * @description 虽然叫主题，但是其实只是 less 的变量设置
+   * @doc antd的主题设置 https://ant.design/docs/react/customize-theme-cn
+   * @doc umi 的 theme 配置 https://umijs.org/docs/api/config#theme
+   */
+  // theme: { '@primary-color': '#1DA57A' }
+  /**
+   * @name moment 的国际化配置
+   * @description 如果对国际化没有要求，打开之后能减少js的包大小
+   * @doc https://umijs.org/docs/api/config#ignoremomentlocale
+   */
+  ignoreMomentLocale: true,
+  /**
+   * @name 代理配置
+   * @description 可以让你的本地服务器代理到你的服务器上，这样你就可以访问服务器的数据了
+   * @see 要注意以下 代理只能在本地开发时使用，build 之后就无法使用了。
+   * @doc 代理介绍 https://umijs.org/docs/guides/proxy
+   * @doc 代理配置 https://umijs.org/docs/api/config#proxy
+   */
+  proxy: proxy[REACT_APP_ENV as keyof typeof proxy],
+  /**
+   * @name 快速热更新配置
+   * @description 一个不错的热更新组件，更新时可以保留 state
+   */
+  fastRefresh: true,
+  //============== 以下都是max的插件配置 ===============
+  /**
+   * @name 数据流插件
+   * @@doc https://umijs.org/docs/max/data-flow
+   */
+  model: {},
+  /**
+   * 一个全局的初始数据流，可以用它在插件之间共享数据
+   * @description 可以用来存放一些全局的数据，比如用户信息，或者一些全局的状态，全局初始状态在整个 Umi 项目的最开始创建。
+   * @doc https://umijs.org/docs/max/data-flow#%E5%85%A8%E5%B1%80%E5%88%9D%E5%A7%8B%E7%8A%B6%E6%80%81
+   */
+  initialState: {},
+  /**
+   * @name layout 插件
+   * @doc https://umijs.org/docs/max/layout-menu
+   */
+  title: 'Antd-Gin Admin',
+  metas: [
+    {
+      name: 'description',
+      content: 'Antd-Gin Admin 是一个开源的通用后台管理系统。',
+    },
+    {
+      name: 'keywords',
+      content: 'Antd-Gin Admin,通用后台管理系统,开源后台,管理后台',
+    },
+  ],
+  links: [
+    {
+      rel: 'icon',
+      type: 'image/png',
+      href: join(PUBLIC_PATH, 'favicon.png'),
+    },
+    {
+      rel: 'apple-touch-icon',
+      href: join(PUBLIC_PATH, 'icons/icon-192x192.png'),
+    },
+  ],
+  layout: {
+    locale: false,
+    ...defaultSettings,
+  },
+  /**
+   * @name moment2dayjs 插件
+   * @description 将项目中的 moment 替换为 dayjs
+   * @doc https://umijs.org/docs/max/moment2dayjs
+   */
+  moment2dayjs: {
+    preset: 'antd',
+    plugins: ['duration'],
+  },
+  /**
+   * @name antd 插件
+   * @description 内置了 babel import 插件
+   * @doc https://umijs.org/docs/max/antd#antd
+   */
+  antd: {
+    appConfig: {},
+    configProvider: {
+      locale: zhCN,
+      theme: {
+        cssVar: true,
+        token: {
+          fontFamily: 'AlibabaSans, sans-serif',
+          colorPrimary: defaultSettings.colorPrimary,
+          colorLink: defaultSettings.colorPrimary,
+        },
+      },
+    },
+  },
+  /**
+   * @name 网络请求配置
+   * @description 它基于 axios 和 ahooks 的 useRequest 提供了一套统一的网络请求和错误处理方案。
+   * @doc https://umijs.org/docs/max/request
+   */
+  request: {},
+  /**
+   * @name 权限插件
+   * @description 基于 initialState 的权限插件，必须先打开 initialState
+   * @doc https://umijs.org/docs/max/access
+   */
+  access: {},
+  /**
+   * @name <head> 中额外的 script
+   * @description 配置 <head> 中额外的 script
+   */
+  headScripts: [
+    // 解决首次加载时白屏的问题
+    {
+      src: join(PUBLIC_PATH, 'scripts/loading.js'),
+      async: true,
+    },
+  ],
+  //================ pro 插件配置 =================
+  presets: ['umi-presets-pro'],
+  mock: {
+    include: ['mock/**/*', 'src/pages/**/_mock.ts'],
+  },
+  /**
+   * @name 是否开启 mako
+   * @description 使用 mako 极速研发
+   * @doc https://umijs.org/docs/api/config#mako
+   */
+  mako: {},
+  esbuildMinifyIIFE: true,
+  requestRecord: {},
+  exportStatic: {},
+});
+
+export default config;

@@ -1,0 +1,57 @@
+# Render 部署配置文件
+# 此文件用于在 Render 平台一键部署整个应用栈
+# 文档: https://render.com/docs/blueprint-spec
+
+services:
+  # 后端服务
+  - type: web
+    name: antd-gin-admin-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: ./server
+    envVars:
+      - key: CONFIG_FILE
+        value: configs/config.render.yaml
+      - key: TZ
+        value: Asia/Shanghai
+      - key: DATABASE_URL
+        fromDatabase:
+          name: antd-gin-postgres
+          property: connectionString
+      # Redis URL - 需要手动创建 Redis 服务后设置
+      # 在 Render Dashboard 创建 Redis 后，复制 Internal Redis URL 并设置为环境变量
+      # - key: REDIS_URL
+      #   value: redis://:password@host:port/0
+      - key: JWT_SECRET
+        generateValue: true  # Render 会自动生成
+      - key: PORT
+        value: "8080"
+    healthCheckPath: /api/v1/system/health
+    autoDeploy: false  # 关闭 GitHub 推送自动部署，改为手动部署
+
+  # 前端服务
+  - type: web
+    name: antd-gin-admin-web
+    runtime: docker
+    dockerfilePath: ./frontend/admin-web/Dockerfile
+    dockerContext: ./frontend/admin-web
+    envVars:
+      - key: REACT_APP_API_BASE_URL
+        fromService:
+          name: antd-gin-admin-backend
+          type: web
+          property: host
+    autoDeploy: false  # 关闭 GitHub 推送自动部署，改为手动部署
+
+databases:
+  # PostgreSQL 数据库
+  - name: antd-gin-postgres
+    databaseName: antd_gin_admin_scaffold
+    user: antd-gin
+    plan: free  # 免费计划
+
+# 注意：Redis 不支持在 Blueprint 中自动创建
+# 需要在 Render Dashboard 中手动创建 Redis 服务
+# 创建后，REDIS_URL 环境变量会自动注入到后端服务中
+
