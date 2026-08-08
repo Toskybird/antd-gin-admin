@@ -1,0 +1,20 @@
+id: tech-detect
+info:
+  name: Technology Detection
+  author: antd-gin-admin
+  severity: info
+  description: Detects common Server / powered-by headers (local fixture).
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+    extractors:
+      - type: kval
+        kval:
+          - server
+          - x_powered_by
+    matchers:
+      - type: dsl
+        dsl:
+          - "len(server) > 0 || len(x_powered_by) > 0"
+        condition: and

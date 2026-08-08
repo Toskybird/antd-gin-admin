@@ -50,7 +50,10 @@ func (r *Runner) ProcessJob(ctx context.Context, jobCode string) error {
 	if job == nil {
 		return nil
 	}
-	if job.Status == scanjobsvc.StatusCancelled {
+	// Skip terminal states (e.g. duplicate queue entries after recover).
+	if job.Status == scanjobsvc.StatusSucceeded ||
+		job.Status == scanjobsvc.StatusFailed ||
+		job.Status == scanjobsvc.StatusCancelled {
 		return nil
 	}
 	job.Status = scanjobsvc.StatusRunning
@@ -127,6 +130,28 @@ func (r *Runner) ProcessJob(ctx context.Context, jobCode string) error {
 	job.FindingCount = int(count)
 	job.FinishedAt = &now
 	return r.jobs.Update(ctx, job)
+}
+
+// RunLoop continuously consumes the queue until ctx is cancelled.
+func (r *Runner) RunLoop(ctx context.Context, idleSleep time.Duration) {
+	if idleSleep <= 0 {
+		idleSleep = time.Second
+	}
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+		ok, err := r.ProcessNext(ctx)
+		if err != nil {
+			time.Sleep(idleSleep)
+			continue
+		}
+		if !ok {
+			time.Sleep(idleSleep)
+		}
+	}
 }
 
 func generateFindingCode() (string, error) {

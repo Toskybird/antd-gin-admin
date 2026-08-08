@@ -1,8 +1,10 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,14 +21,12 @@ import (
 	repoMock "antd-gin-admin-backend/internal/repository/mock"
 	assetsvc "antd-gin-admin-backend/internal/service/asset"
 	authsvc "antd-gin-admin-backend/internal/service/auth"
-	detectionrulesvc "antd-gin-admin-backend/internal/service/detectionrule"
-	findingsvc "antd-gin-admin-backend/internal/service/finding"
-	scanjobsvc "antd-gin-admin-backend/internal/service/scanjob"
-	scanreportsvc "antd-gin-admin-backend/internal/service/scanreport"
 	cachesvc "antd-gin-admin-backend/internal/service/cache"
 	dataManageSvc "antd-gin-admin-backend/internal/service/data_manage"
 	dataScopeSvc "antd-gin-admin-backend/internal/service/data_scope"
 	deptsvc "antd-gin-admin-backend/internal/service/dept"
+	detectionrulesvc "antd-gin-admin-backend/internal/service/detectionrule"
+	findingsvc "antd-gin-admin-backend/internal/service/finding"
 	serviceInterfaces "antd-gin-admin-backend/internal/service/interfaces"
 	menusvc "antd-gin-admin-backend/internal/service/menu"
 	monitorsvc "antd-gin-admin-backend/internal/service/monitor"
@@ -36,8 +36,12 @@ import (
 	rolesvc "antd-gin-admin-backend/internal/service/role"
 	roleDeptSvc "antd-gin-admin-backend/internal/service/role_dept"
 	roleMenuSvc "antd-gin-admin-backend/internal/service/role_menu"
+	scanjobsvc "antd-gin-admin-backend/internal/service/scanjob"
+	scanreportsvc "antd-gin-admin-backend/internal/service/scanreport"
+	"antd-gin-admin-backend/internal/service/scanengine"
 	usersvc "antd-gin-admin-backend/internal/service/user"
 	userRoleSvc "antd-gin-admin-backend/internal/service/user_role"
+	"antd-gin-admin-backend/internal/service/worker"
 	"antd-gin-admin-backend/pkg/database"
 	"antd-gin-admin-backend/pkg/logger"
 	redisclient "antd-gin-admin-backend/pkg/redis"
@@ -196,12 +200,13 @@ func Run(cfg *config.Config) error {
 		detectionRuleSvcVar = detectionrulesvc.New(detectionRuleRepo, ruleSource)
 	}
 	var scanJobSvcVar serviceInterfaces.ScanJobService
+	var scanQueue repoInterfaces.ScanJobQueue
 	if scanJobRepo != nil && assetRepo != nil {
-		var queue repoInterfaces.ScanJobQueue = repoMock.NewMemoryScanJobQueue()
+		scanQueue = repoMock.NewMemoryScanJobQueue()
 		if redisClient != nil {
-			queue = scanjobsvc.NewRedisQueue(redisClient)
+			scanQueue = scanjobsvc.NewRedisQueue(redisClient)
 		}
-		scanJobSvcVar = scanjobsvc.New(scanJobRepo, assetRepo, queue)
+		scanJobSvcVar = scanjobsvc.New(scanJobRepo, assetRepo, scanQueue)
 	}
 	var findingSvcVar serviceInterfaces.FindingService
 	if findingRepo != nil && scanJobRepo != nil {
@@ -212,6 +217,40 @@ func Run(cfg *config.Config) error {
 		// v1: in-process fake/memory store until MinIO client is wired from config.
 		storage := repoMock.NewMemoryObjectStorage()
 		reportSvcVar = scanreportsvc.New(scanReportRepo, scanJobRepo, findingRepo, storage)
+	}
+
+	// Start in-process scan worker; prefer Nuclei CLI when available (ADR-0002).
+	if scanJobRepo != nil && findingRepo != nil && scanQueue != nil && detectionRuleSvcVar != nil {
+		fakeEngine := &repoMock.FakeScanEngine{Findings: []repoInterfaces.EngineFinding{
+			{RuleCode: "exposed-panels", Severity: "high", Title: "Exposed admin panel", Description: "Admin panel reachable", Evidence: "HTTP 200", Location: "/admin"},
+			{RuleCode: "http-missing-security-headers", Severity: "medium", Title: "Missing security headers", Description: "CSP/HSTS missing", Evidence: "header absent", Location: "/"},
+			{RuleCode: "tech-detect", Severity: "info", Title: "Technology detected", Description: "Server fingerprint", Evidence: "Server header", Location: "/"},
+		}}
+		nucleiEngine := &scanengine.NucleiCLI{
+			BinPath:      cfg.Scan.NucleiBin,
+			TemplatesDir: cfg.Scan.NucleiTemplates,
+		}
+		var scanEngineAdapter repoInterfaces.ScanEngineAdapter
+		engineKind := "fake"
+		switch strings.ToLower(strings.TrimSpace(cfg.Scan.Engine)) {
+		case "fake":
+			scanEngineAdapter = fakeEngine
+		case "nuclei":
+			if !nucleiEngine.Available() {
+				return fmt.Errorf("scan.engine=nuclei but nuclei binary not found (bin=%q)", cfg.Scan.NucleiBin)
+			}
+			scanEngineAdapter = nucleiEngine
+			engineKind = "nuclei"
+		default: // auto
+			scanEngineAdapter, engineKind = scanengine.ResolveEngine(nucleiEngine, fakeEngine)
+		}
+		runner := worker.NewRunner(scanJobRepo, findingRepo, scanQueue, scanEngineAdapter, detectionRuleSvcVar)
+		if _, err := detectionRuleSvcVar.Sync(context.Background()); err != nil {
+			logger.Warn(nil, "detection rule sync on worker start failed", "error", err.Error())
+		}
+		recoverQueuedScanJobs(context.Background(), scanJobRepo, scanQueue)
+		go runner.RunLoop(context.Background(), time.Second)
+		logger.Info(nil, "scan worker started", "engine", engineKind)
 	}
 
 	api := engine.Group("/api/v1")
@@ -229,4 +268,27 @@ func Run(cfg *config.Config) error {
 	}
 	addr := fmt.Sprintf(":%s", port)
 	return engine.Run(addr)
+}
+
+// recoverQueuedScanJobs re-enqueues DB jobs still marked queued (e.g. after restart).
+func recoverQueuedScanJobs(ctx context.Context, jobs repoInterfaces.ScanJobRepository, queue repoInterfaces.ScanJobQueue) {
+	if jobs == nil || queue == nil {
+		return
+	}
+	items, _, err := jobs.List(ctx, 1, 1000, repoInterfaces.ScanJobListFilter{Status: "queued", All: true})
+	if err != nil {
+		logger.Warn(nil, "recover queued scan jobs failed", "error", err.Error())
+		return
+	}
+	for _, job := range items {
+		if job == nil {
+			continue
+		}
+		if err := queue.Enqueue(ctx, job.JobCode); err != nil {
+			logger.Warn(nil, "re-enqueue scan job failed", "job_code", job.JobCode, "error", err.Error())
+		}
+	}
+	if len(items) > 0 {
+		logger.Info(nil, "re-enqueued queued scan jobs", "count", len(items))
+	}
 }

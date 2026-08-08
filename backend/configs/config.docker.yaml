@@ -46,3 +46,8 @@ s3:
   bucket: "scan-reports"
   use_path_style: true
 
+scan:
+  engine: "auto"
+  nuclei_bin: "nuclei"
+  nuclei_templates: "configs/nuclei-templates"
+

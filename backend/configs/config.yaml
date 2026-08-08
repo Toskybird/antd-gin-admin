@@ -39,3 +39,10 @@ log:
   retention_days: 3
   file_path: "logs/app.log"
   max_size_mb: 100
+
+# 扫描引擎：auto=本机有 nuclei 则用真引擎，否则假引擎
+# 默认使用仓库内固化模板（私有化可控，见 ADR-0002）；也可改指向官方 nuclei-templates 目录
+scan:
+  engine: "auto"
+  nuclei_bin: "nuclei"
+  nuclei_templates: "configs/nuclei-templates"
