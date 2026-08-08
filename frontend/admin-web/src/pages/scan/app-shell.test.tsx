@@ -25,7 +25,13 @@ describe('web-admin app-shell scan section (default)', () => {
     expect(scan.access).toBe('canViewScanSection');
 
     const childPaths = (scan.routes || [])
-      .filter((r: any) => typeof r.path === 'string' && r.component)
+      .filter(
+        (r: any) =>
+          typeof r.path === 'string' &&
+          r.component &&
+          !r.hideInMenu &&
+          !r.redirect,
+      )
       .map((r: any) => r.path);
 
     expect(childPaths).toEqual([...SCAN_CHILD_ROUTE_PATHS]);

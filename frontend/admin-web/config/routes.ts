@@ -65,13 +65,43 @@ export default [
         access: 'canViewScanAsset',
       },
       {
+        path: '/scan/asset/create',
+        component: './scan/asset/form',
+        hideInMenu: true,
+        access: 'canViewScanAsset',
+      },
+      {
+        path: '/scan/asset/edit/:code',
+        component: './scan/asset/form',
+        hideInMenu: true,
+        access: 'canViewScanAsset',
+      },
+      {
         path: '/scan/job',
         component: './scan/job',
         access: 'canViewScanJob',
       },
       {
+        path: '/scan/job/create',
+        component: './scan/job/create',
+        hideInMenu: true,
+        access: 'canViewScanJob',
+      },
+      {
+        path: '/scan/job/detail/:code',
+        component: './scan/job/detail',
+        hideInMenu: true,
+        access: 'canViewScanJob',
+      },
+      {
         path: '/scan/finding',
         component: './scan/finding',
+        access: 'canViewScanFinding',
+      },
+      {
+        path: '/scan/finding/detail/:code',
+        component: './scan/finding/detail',
+        hideInMenu: true,
         access: 'canViewScanFinding',
       },
       {
