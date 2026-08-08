@@ -54,7 +54,7 @@ func setupAssetRouter(t *testing.T, scope *serviceinterfaces.UserDataScope) *gin
 
 	api := router.Group("/api/v1")
 	system.RegisterRoutes(api, authSvc, authMiddleware, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	scan.RegisterRoutes(api, authMiddleware, nil, dataScopeSvc, assetSvc)
+	scan.RegisterRoutes(api, authMiddleware, nil, dataScopeSvc, assetSvc, nil)
 	return router
 }
 

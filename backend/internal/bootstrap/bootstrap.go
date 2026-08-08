@@ -31,6 +31,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&entity.RoleDept{},
 		&entity.OperationLog{},
 		&entity.Asset{},
+		&entity.DetectionRule{},
 	)
 }
 
@@ -185,6 +186,35 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 			Perms:      "scan:asset:delete",
 			Status:     1,
 			SortOrder:  254,
+		},
+		{
+			MenuCode:   "scan-detection-rule",
+			ParentCode: "scan",
+			MenuName:   "检测规则",
+			MenuType:   "C",
+			Path:       "/scan/detection-rule",
+			Component:  "/scan/detection-rule",
+			Perms:      "scan:detection-rule:list",
+			Status:     1,
+			SortOrder:  255,
+		},
+		{
+			MenuCode:   "scan-detection-rule-sync",
+			ParentCode: "scan-detection-rule",
+			MenuName:   "同步检测规则",
+			MenuType:   "F",
+			Perms:      "scan:detection-rule:sync",
+			Status:     1,
+			SortOrder:  256,
+		},
+		{
+			MenuCode:   "scan-detection-rule-update",
+			ParentCode: "scan-detection-rule",
+			MenuName:   "启停检测规则",
+			MenuType:   "F",
+			Perms:      "scan:detection-rule:update",
+			Status:     1,
+			SortOrder:  257,
 		},
 		{
 			MenuCode:  "system",
