@@ -13,6 +13,7 @@ import (
 	"time"
 
 	repointerfaces "antd-gin-admin-backend/internal/repository/interfaces"
+	"antd-gin-admin-backend/pkg/logger"
 )
 
 // NucleiCLI runs ProjectDiscovery nuclei as a subprocess.
@@ -110,6 +111,7 @@ func (n *NucleiCLI) Scan(ctx context.Context, req repointerfaces.ScanRequest) ([
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
+	logger.Info(nil, "nuclei scan start", "bin", bin, "url", req.EntryURL, "policy", req.Policy, "rules", len(req.EnabledRules))
 
 	err = cmd.Run()
 	// nuclei exits non-zero in some versions when findings exist or templates missing;
@@ -128,19 +130,22 @@ func (n *NucleiCLI) Scan(ctx context.Context, req repointerfaces.ScanRequest) ([
 		}
 		return nil, fmt.Errorf("nuclei failed: %s", msg)
 	}
+	logger.Info(nil, "nuclei scan done", "url", req.EntryURL, "findings", len(findings), "exit_err", err != nil)
 	return findings, nil
 }
 
 func severityForPolicy(policy string) string {
+	// Bundled templates are mostly info/high. Excluding info made standard/quick
+	// scans succeed with zero findings even when nuclei ran correctly.
 	switch strings.TrimSpace(strings.ToLower(policy)) {
 	case "quick":
-		return "critical,high"
+		return "critical,high,medium,info"
 	case "standard":
-		return "critical,high,medium"
+		return "critical,high,medium,low,info"
 	case "deep":
 		return "critical,high,medium,low,info"
 	default:
-		return "critical,high,medium"
+		return "critical,high,medium,low,info"
 	}
 }
 

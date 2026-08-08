@@ -71,7 +71,7 @@ func TestResolveEngine(t *testing.T) {
 }
 
 func TestSeverityForPolicy(t *testing.T) {
-	assert.Equal(t, "critical,high", severityForPolicy("quick"))
-	assert.Equal(t, "critical,high,medium", severityForPolicy("standard"))
+	assert.Equal(t, "critical,high,medium,info", severityForPolicy("quick"))
+	assert.Equal(t, "critical,high,medium,low,info", severityForPolicy("standard"))
 	assert.Equal(t, "critical,high,medium,low,info", severityForPolicy("deep"))
 }
