@@ -2,6 +2,7 @@ package mock
 
 import (
 	"context"
+	"strings"
 	"sync"
 	"time"
 
@@ -10,10 +11,10 @@ import (
 )
 
 type FindingMockRepository struct {
-	mu       sync.Mutex
-	byCode   map[string]*entity.Finding
-	byJob    map[string][]string
-	seq      int64
+	mu     sync.Mutex
+	byCode map[string]*entity.Finding
+	byJob  map[string][]string
+	seq    int64
 }
 
 func NewFindingMockRepository() *FindingMockRepository {
@@ -55,6 +56,70 @@ func (r *FindingMockRepository) ListByJob(_ context.Context, jobCode string) ([]
 		}
 	}
 	return out, nil
+}
+
+func (r *FindingMockRepository) GetByCode(_ context.Context, findingCode string) (*entity.Finding, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	existing, ok := r.byCode[findingCode]
+	if !ok {
+		return nil, nil
+	}
+	cp := *existing
+	return &cp, nil
+}
+
+func (r *FindingMockRepository) List(_ context.Context, page, pageSize int, filter interfaces.FindingListFilter) ([]*entity.Finding, int64, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	allowed := map[string]struct{}{}
+	if !filter.All {
+		for _, code := range filter.JobCodes {
+			allowed[code] = struct{}{}
+		}
+	}
+	keyword := strings.TrimSpace(strings.ToLower(filter.Keyword))
+	items := make([]*entity.Finding, 0)
+	for _, f := range r.byCode {
+		if !filter.All {
+			if _, ok := allowed[f.JobCode]; !ok {
+				continue
+			}
+		}
+		if filter.JobCode != "" && f.JobCode != filter.JobCode {
+			continue
+		}
+		if filter.RuleCode != "" && f.RuleCode != filter.RuleCode {
+			continue
+		}
+		if filter.Severity != "" && f.Severity != filter.Severity {
+			continue
+		}
+		if keyword != "" {
+			hay := strings.ToLower(f.Title + " " + f.Description + " " + f.Location + " " + f.Evidence + " " + f.FindingCode)
+			if !strings.Contains(hay, keyword) {
+				continue
+			}
+		}
+		cp := *f
+		items = append(items, &cp)
+	}
+	total := int64(len(items))
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	start := (page - 1) * pageSize
+	if start >= len(items) {
+		return []*entity.Finding{}, total, nil
+	}
+	end := start + pageSize
+	if end > len(items) {
+		end = len(items)
+	}
+	return items[start:end], total, nil
 }
 
 // FakeScanEngine returns deterministic findings for enabled rules.

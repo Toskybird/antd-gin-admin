@@ -51,7 +51,7 @@ func setupScanJobRouter(t *testing.T, scope *serviceinterfaces.UserDataScope) *s
 
 	api := router.Group("/api/v1")
 	system.RegisterRoutes(api, authSvc, authMiddleware, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	scan.RegisterRoutes(api, authMiddleware, nil, dataScopeSvc, assetSvc, nil, jobSvc)
+	scan.RegisterRoutes(api, authMiddleware, nil, dataScopeSvc, assetSvc, nil, jobSvc, nil)
 	return &scanJobFixture{router: router, queue: queue}
 }
 

@@ -248,6 +248,17 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 			SortOrder:  260,
 		},
 		{
+			MenuCode:   "scan-finding",
+			ParentCode: "scan",
+			MenuName:   "发现项",
+			MenuType:   "C",
+			Path:       "/scan/finding",
+			Component:  "/scan/finding",
+			Perms:      "scan:finding:list",
+			Status:     1,
+			SortOrder:  261,
+		},
+		{
 			MenuCode:  "system",
 			MenuName:  "系统管理",
 			MenuType:  "M",

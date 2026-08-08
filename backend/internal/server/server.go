@@ -20,6 +20,7 @@ import (
 	assetsvc "antd-gin-admin-backend/internal/service/asset"
 	authsvc "antd-gin-admin-backend/internal/service/auth"
 	detectionrulesvc "antd-gin-admin-backend/internal/service/detectionrule"
+	findingsvc "antd-gin-admin-backend/internal/service/finding"
 	scanjobsvc "antd-gin-admin-backend/internal/service/scanjob"
 	cachesvc "antd-gin-admin-backend/internal/service/cache"
 	dataManageSvc "antd-gin-admin-backend/internal/service/data_manage"
@@ -99,6 +100,7 @@ func Run(cfg *config.Config) error {
 	var assetRepo repoInterfaces.AssetRepository
 	var detectionRuleRepo repoInterfaces.DetectionRuleRepository
 	var scanJobRepo repoInterfaces.ScanJobRepository
+	var findingRepo repoInterfaces.FindingRepository
 	if cfg.Auth.UseMock {
 		authRepo = repoMock.NewAuthMockRepository()
 	} else {
@@ -115,6 +117,7 @@ func Run(cfg *config.Config) error {
 		assetRepo = repoDB.NewAssetRepository(db)
 		detectionRuleRepo = repoDB.NewDetectionRuleRepository(db)
 		scanJobRepo = repoDB.NewScanJobRepository(db)
+		findingRepo = repoDB.NewFindingRepository(db)
 	}
 	authSvc := authsvc.New(authRepo, cfg.JWT.Secret, cfg.JWT.Issuer, cfg.JWT.ExpireTime)
 	var userSvc serviceInterfaces.UserService
@@ -197,11 +200,15 @@ func Run(cfg *config.Config) error {
 		}
 		scanJobSvcVar = scanjobsvc.New(scanJobRepo, assetRepo, queue)
 	}
+	var findingSvcVar serviceInterfaces.FindingService
+	if findingRepo != nil && scanJobRepo != nil {
+		findingSvcVar = findingsvc.New(findingRepo, scanJobRepo, detectionRuleRepo)
+	}
 
 	api := engine.Group("/api/v1")
 	{
 		system.RegisterRoutes(api, authSvc, authMiddleware, permissionSvcVar, dataScopeSvcVar, profileSvc, userSvc, roleSvc, menuSvc, deptSvc, userRoleSvcVar, roleMenuSvcVar, roleDeptSvcVar, operationLogSvcVar, monitorSvcVar, dataManageSvcVar, cacheSvcVar)
-		scan.RegisterRoutes(api, authMiddleware, permissionSvcVar, dataScopeSvcVar, assetSvcVar, detectionRuleSvcVar, scanJobSvcVar)
+		scan.RegisterRoutes(api, authMiddleware, permissionSvcVar, dataScopeSvcVar, assetSvcVar, detectionRuleSvcVar, scanJobSvcVar, findingSvcVar)
 	}
 
 	port := cfg.Server.Port
