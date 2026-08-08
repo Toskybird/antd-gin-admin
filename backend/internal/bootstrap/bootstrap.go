@@ -32,6 +32,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&entity.OperationLog{},
 		&entity.Asset{},
 		&entity.DetectionRule{},
+		&entity.ScanJob{},
 	)
 }
 
@@ -215,6 +216,35 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 			Perms:      "scan:detection-rule:update",
 			Status:     1,
 			SortOrder:  257,
+		},
+		{
+			MenuCode:   "scan-job",
+			ParentCode: "scan",
+			MenuName:   "扫描任务",
+			MenuType:   "C",
+			Path:       "/scan/job",
+			Component:  "/scan/job",
+			Perms:      "scan:job:list",
+			Status:     1,
+			SortOrder:  258,
+		},
+		{
+			MenuCode:   "scan-job-create",
+			ParentCode: "scan-job",
+			MenuName:   "创建扫描",
+			MenuType:   "F",
+			Perms:      "scan:job:create",
+			Status:     1,
+			SortOrder:  259,
+		},
+		{
+			MenuCode:   "scan-job-cancel",
+			ParentCode: "scan-job",
+			MenuName:   "取消扫描",
+			MenuType:   "F",
+			Perms:      "scan:job:cancel",
+			Status:     1,
+			SortOrder:  260,
 		},
 		{
 			MenuCode:  "system",

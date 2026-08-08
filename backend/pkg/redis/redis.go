@@ -222,3 +222,13 @@ func (c *Client) clientForDB(db int) *redis.Client {
 func (c *Client) Close() error {
 	return c.rdb.Close()
 }
+
+// LPush pushes values to the head of a list.
+func (c *Client) LPush(ctx context.Context, key string, values ...interface{}) error {
+	return c.rdb.LPush(ctx, key, values...).Err()
+}
+
+// LRange returns a range of elements from a list.
+func (c *Client) LRange(ctx context.Context, key string, start, stop int64) ([]string, error) {
+	return c.rdb.LRange(ctx, key, start, stop).Result()
+}

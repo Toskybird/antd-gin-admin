@@ -44,7 +44,7 @@ func setupDetectionRuleRouter(t *testing.T) *gin.Engine {
 
 	api := router.Group("/api/v1")
 	system.RegisterRoutes(api, authSvc, authMiddleware, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	scan.RegisterRoutes(api, authMiddleware, nil, nil, nil, svc)
+	scan.RegisterRoutes(api, authMiddleware, nil, nil, nil, svc, nil)
 	return router
 }
 

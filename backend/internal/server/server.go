@@ -20,6 +20,7 @@ import (
 	assetsvc "antd-gin-admin-backend/internal/service/asset"
 	authsvc "antd-gin-admin-backend/internal/service/auth"
 	detectionrulesvc "antd-gin-admin-backend/internal/service/detectionrule"
+	scanjobsvc "antd-gin-admin-backend/internal/service/scanjob"
 	cachesvc "antd-gin-admin-backend/internal/service/cache"
 	dataManageSvc "antd-gin-admin-backend/internal/service/data_manage"
 	dataScopeSvc "antd-gin-admin-backend/internal/service/data_scope"
@@ -97,6 +98,7 @@ func Run(cfg *config.Config) error {
 	var dbMetaRepo repoInterfaces.DBMetaRepository
 	var assetRepo repoInterfaces.AssetRepository
 	var detectionRuleRepo repoInterfaces.DetectionRuleRepository
+	var scanJobRepo repoInterfaces.ScanJobRepository
 	if cfg.Auth.UseMock {
 		authRepo = repoMock.NewAuthMockRepository()
 	} else {
@@ -112,6 +114,7 @@ func Run(cfg *config.Config) error {
 		dbMetaRepo = repoDB.NewDBMetaRepository(db)
 		assetRepo = repoDB.NewAssetRepository(db)
 		detectionRuleRepo = repoDB.NewDetectionRuleRepository(db)
+		scanJobRepo = repoDB.NewScanJobRepository(db)
 	}
 	authSvc := authsvc.New(authRepo, cfg.JWT.Secret, cfg.JWT.Issuer, cfg.JWT.ExpireTime)
 	var userSvc serviceInterfaces.UserService
@@ -186,11 +189,19 @@ func Run(cfg *config.Config) error {
 		}
 		detectionRuleSvcVar = detectionrulesvc.New(detectionRuleRepo, ruleSource)
 	}
+	var scanJobSvcVar serviceInterfaces.ScanJobService
+	if scanJobRepo != nil && assetRepo != nil {
+		var queue repoInterfaces.ScanJobQueue = repoMock.NewMemoryScanJobQueue()
+		if redisClient != nil {
+			queue = scanjobsvc.NewRedisQueue(redisClient)
+		}
+		scanJobSvcVar = scanjobsvc.New(scanJobRepo, assetRepo, queue)
+	}
 
 	api := engine.Group("/api/v1")
 	{
 		system.RegisterRoutes(api, authSvc, authMiddleware, permissionSvcVar, dataScopeSvcVar, profileSvc, userSvc, roleSvc, menuSvc, deptSvc, userRoleSvcVar, roleMenuSvcVar, roleDeptSvcVar, operationLogSvcVar, monitorSvcVar, dataManageSvcVar, cacheSvcVar)
-		scan.RegisterRoutes(api, authMiddleware, permissionSvcVar, dataScopeSvcVar, assetSvcVar, detectionRuleSvcVar)
+		scan.RegisterRoutes(api, authMiddleware, permissionSvcVar, dataScopeSvcVar, assetSvcVar, detectionRuleSvcVar, scanJobSvcVar)
 	}
 
 	port := cfg.Server.Port

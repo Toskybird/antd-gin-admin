@@ -15,8 +15,8 @@ import (
 )
 
 // RegisterRoutes wires scan module routes under /scan.
-func RegisterRoutes(rg *gin.RouterGroup, authMiddleware gin.HandlerFunc, permissionSvc interfaces.PermissionService, dataScopeSvc interfaces.DataScopeService, assetSvc interfaces.AssetService, detectionRuleSvc interfaces.DetectionRuleService) {
-	if assetSvc == nil && detectionRuleSvc == nil {
+func RegisterRoutes(rg *gin.RouterGroup, authMiddleware gin.HandlerFunc, permissionSvc interfaces.PermissionService, dataScopeSvc interfaces.DataScopeService, assetSvc interfaces.AssetService, detectionRuleSvc interfaces.DetectionRuleService, scanJobSvc interfaces.ScanJobService) {
+	if assetSvc == nil && detectionRuleSvc == nil && scanJobSvc == nil {
 		return
 	}
 	r := rg.Group("/scan")
@@ -28,6 +28,9 @@ func RegisterRoutes(rg *gin.RouterGroup, authMiddleware gin.HandlerFunc, permiss
 	}
 	if detectionRuleSvc != nil {
 		registerDetectionRuleRoutes(r, permissionSvc, detectionRuleSvc)
+	}
+	if scanJobSvc != nil {
+		registerScanJobRoutes(r, permissionSvc, dataScopeSvc, scanJobSvc)
 	}
 }
 
