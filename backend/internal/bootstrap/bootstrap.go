@@ -34,6 +34,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&entity.DetectionRule{},
 		&entity.ScanJob{},
 		&entity.Finding{},
+		&entity.ScanReport{},
 	)
 }
 
@@ -257,6 +258,26 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 			Perms:      "scan:finding:list",
 			Status:     1,
 			SortOrder:  261,
+		},
+		{
+			MenuCode:   "scan-report",
+			ParentCode: "scan",
+			MenuName:   "扫描报告",
+			MenuType:   "C",
+			Path:       "/scan/report",
+			Component:  "/scan/report",
+			Perms:      "scan:report:list",
+			Status:     1,
+			SortOrder:  262,
+		},
+		{
+			MenuCode:   "scan-report-create",
+			ParentCode: "scan-report",
+			MenuName:   "生成报告",
+			MenuType:   "F",
+			Perms:      "scan:report:create",
+			Status:     1,
+			SortOrder:  263,
 		},
 		{
 			MenuCode:  "system",

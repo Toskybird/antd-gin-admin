@@ -61,7 +61,7 @@ func setupFindingRouter(t *testing.T, scope *serviceinterfaces.UserDataScope) *f
 
 	api := router.Group("/api/v1")
 	system.RegisterRoutes(api, authSvc, authMiddleware, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	scan.RegisterRoutes(api, authMiddleware, nil, dataScopeSvc, assetSvc, nil, jobSvc, findingSvc)
+	scan.RegisterRoutes(api, authMiddleware, nil, dataScopeSvc, assetSvc, nil, jobSvc, findingSvc, nil)
 	return &findingFixture{router: router, findingRepo: findingRepo, jobRepo: jobRepo, ruleRepo: ruleRepo}
 }
 
