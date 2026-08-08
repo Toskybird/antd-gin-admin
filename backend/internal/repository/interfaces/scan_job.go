@@ -20,6 +20,7 @@ type ScanJobListFilter struct {
 type ScanJobQueue interface {
 	Enqueue(ctx context.Context, jobCode string) error
 	ListEnqueued(ctx context.Context) ([]string, error)
+	Dequeue(ctx context.Context) (string, bool, error)
 }
 
 // ScanJobRepository persists ScanJob records.

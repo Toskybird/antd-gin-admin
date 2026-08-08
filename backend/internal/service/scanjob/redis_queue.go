@@ -32,3 +32,17 @@ func (q *RedisQueue) ListEnqueued(ctx context.Context) ([]string, error) {
 	}
 	return q.client.LRange(ctx, q.key, 0, -1)
 }
+
+func (q *RedisQueue) Dequeue(ctx context.Context) (string, bool, error) {
+	if q == nil || q.client == nil {
+		return "", false, nil
+	}
+	val, err := q.client.RPop(ctx, q.key)
+	if err != nil {
+		return "", false, err
+	}
+	if val == "" {
+		return "", false, nil
+	}
+	return val, true, nil
+}

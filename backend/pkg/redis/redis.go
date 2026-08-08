@@ -232,3 +232,12 @@ func (c *Client) LPush(ctx context.Context, key string, values ...interface{}) e
 func (c *Client) LRange(ctx context.Context, key string, start, stop int64) ([]string, error) {
 	return c.rdb.LRange(ctx, key, start, stop).Result()
 }
+
+// RPop pops one element from the tail of a list.
+func (c *Client) RPop(ctx context.Context, key string) (string, error) {
+	val, err := c.rdb.RPop(ctx, key).Result()
+	if err == redis.Nil {
+		return "", nil
+	}
+	return val, err
+}

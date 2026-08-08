@@ -33,6 +33,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&entity.Asset{},
 		&entity.DetectionRule{},
 		&entity.ScanJob{},
+		&entity.Finding{},
 	)
 }
 

@@ -137,3 +137,14 @@ func (q *MemoryScanJobQueue) ListEnqueued(_ context.Context) ([]string, error) {
 	copy(out, q.codes)
 	return out, nil
 }
+
+func (q *MemoryScanJobQueue) Dequeue(_ context.Context) (string, bool, error) {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	if len(q.codes) == 0 {
+		return "", false, nil
+	}
+	code := q.codes[len(q.codes)-1]
+	q.codes = q.codes[:len(q.codes)-1]
+	return code, true, nil
+}
