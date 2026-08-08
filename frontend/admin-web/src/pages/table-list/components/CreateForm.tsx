@@ -8,17 +8,16 @@ import {
 import { useRequest } from '@umijs/max';
 import { Button, message } from 'antd';
 import type { FC } from 'react';
+import { modalFormLayout } from '@/constants/formLayout';
 import { addRule } from '@/services/ant-design-pro/api';
+
 interface CreateFormProps {
   reload?: ActionType['reload'];
 }
+
 const CreateForm: FC<CreateFormProps> = (props) => {
   const { reload } = props;
   const [messageApi, contextHolder] = message.useMessage();
-  /**
-   * @en-US International configuration
-   * @zh-CN 国际化配置
-   * */
 
   const { run, loading } = useRequest(addRule, {
     manual: true,
@@ -30,17 +29,19 @@ const CreateForm: FC<CreateFormProps> = (props) => {
       messageApi.error('Adding failed, please try again!');
     },
   });
+
   return (
     <>
       {contextHolder}
       <ModalForm
+        {...modalFormLayout}
         title={'新建规则'}
         trigger={
           <Button type="primary" icon={<PlusOutlined />}>
             新建
           </Button>
         }
-        width="400px"
+        width={600}
         modalProps={{
           okButtonProps: {
             loading,
@@ -60,12 +61,13 @@ const CreateForm: FC<CreateFormProps> = (props) => {
               message: '规则名称为必填项',
             },
           ]}
-          width="md"
           name="name"
+          label="规则名称"
         />
-        <ProFormTextArea width="md" name="desc" />
+        <ProFormTextArea name="desc" label="描述" />
       </ModalForm>
     </>
   );
 };
+
 export default CreateForm;

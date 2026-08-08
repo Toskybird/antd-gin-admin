@@ -8,6 +8,7 @@ import {
 import { useRequest } from '@umijs/max';
 import { Button, Drawer, Input, message } from 'antd';
 import React, { useCallback, useRef, useState } from 'react';
+import { searchFormLayout } from '@/constants/formLayout';
 import { removeRule, rule } from '@/services/ant-design-pro/api';
 import CreateForm from './components/CreateForm';
 import UpdateForm from './components/UpdateForm';
@@ -147,9 +148,7 @@ const TableList: React.FC = () => {
         headerTitle={'查询表格'}
         actionRef={actionRef}
         rowKey="key"
-        search={{
-          labelWidth: 120,
-        }}
+        search={{ ...searchFormLayout }}
         toolBarRender={() => [<CreateForm key="create" reload={actionRef.current?.reload} />]}
         request={rule}
         columns={columns}

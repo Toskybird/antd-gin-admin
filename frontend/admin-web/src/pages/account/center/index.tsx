@@ -1,4 +1,5 @@
 import { updateCurrentProfile } from "@/services/antd-gin-api/user";
+import { modalFormLayout } from "@/constants/formLayout";
 import {
   PageContainer,
   ProCard,
@@ -27,8 +28,9 @@ const AccountCenter: React.FC = () => {
     <PageContainer>
       <ProCard>
         <ProForm
+          {...modalFormLayout}
           formRef={formRef}
-          style={{ maxWidth: 560 }}
+          style={{ maxWidth: 640 }}
           initialValues={{
             nickname: currentUser?.nickname,
             email: currentUser?.email,

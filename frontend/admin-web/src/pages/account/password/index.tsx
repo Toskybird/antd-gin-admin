@@ -1,4 +1,5 @@
 import { changeCurrentPassword } from "@/services/antd-gin-api/user";
+import { modalFormLayout } from "@/constants/formLayout";
 import {
   PageContainer,
   ProCard,
@@ -14,7 +15,8 @@ const ChangePassword: React.FC = () => {
     <PageContainer>
       <ProCard>
         <ProForm
-          style={{ maxWidth: 520 }}
+          {...modalFormLayout}
+          style={{ maxWidth: 640 }}
           onFinish={async (values) => {
             const res = await changeCurrentPassword({
               old_password: values.old_password,

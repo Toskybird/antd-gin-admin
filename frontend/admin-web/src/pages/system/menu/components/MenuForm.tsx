@@ -1,8 +1,12 @@
+import {
+  modalFormLayout,
+  modalFormSubmitterLayout,
+} from '@/constants/formLayout';
+import { getMenuTree, type CreateMenuRequest, type Menu, type UpdateMenuRequest } from '@/services/antd-gin-api/menu';
 import { ProForm, ProFormDigit, ProFormText, ProFormSelect, ProFormTreeSelect } from '@ant-design/pro-components';
 import type { ProFormInstance } from '@ant-design/pro-components';
-import { Button, Modal } from 'antd';
+import { Button, Form, Modal } from 'antd';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { getMenuTree, type CreateMenuRequest, type Menu, type UpdateMenuRequest } from '@/services/antd-gin-api/menu';
 
 type TreeOption = {
   title: string;
@@ -118,6 +122,7 @@ const MenuForm: React.FC<MenuFormProps> = ({
       destroyOnHidden
     >
       <ProForm
+        {...modalFormLayout}
         formRef={formRef}
         key={isEdit ? initialValues?.menu_code : 'create'}
         initialValues={memoizedInitialValues ?? { sort_order: 100, status: 1 }}
@@ -125,16 +130,16 @@ const MenuForm: React.FC<MenuFormProps> = ({
           onSubmit(values as CreateMenuRequest | UpdateMenuRequest);
         }}
         submitter={{
-          render: (props, doms) => {
-            return [
-              <Button key="cancel" onClick={onCancel}>
+          render: (props, _doms) => (
+            <Form.Item {...modalFormSubmitterLayout}>
+              <Button key="cancel" onClick={onCancel} style={{ marginRight: 8 }}>
                 取消
-              </Button>,
+              </Button>
               <Button key="submit" type="primary" onClick={() => props.form?.submit?.()}>
                 确定
-              </Button>,
-            ];
-          },
+              </Button>
+            </Form.Item>
+          ),
         }}
       >
         {!isEdit && (

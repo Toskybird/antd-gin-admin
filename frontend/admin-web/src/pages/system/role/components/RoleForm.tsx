@@ -1,3 +1,8 @@
+import {
+  modalFormLayout,
+  modalFormSubmitterLayout,
+  modalFormWideItemLayout,
+} from '@/constants/formLayout';
 import { getMenuTree, type Menu } from '@/services/antd-gin-api/menu';
 import type {
   CreateRoleRequest,
@@ -11,7 +16,7 @@ import {
   ProFormSelect,
   ProFormText,
 } from '@ant-design/pro-components';
-import { Button, message, Modal, Tree } from 'antd';
+import { Button, Form, message, Modal, Tree } from 'antd';
 import type { DataNode } from 'antd/es/tree';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -105,6 +110,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
       destroyOnHidden
     >
       <ProForm
+        {...modalFormLayout}
         formRef={formRef}
         key={isEdit ? initialValues?.role_code : 'create'}
         initialValues={memoizedInitialValues}
@@ -143,20 +149,20 @@ const RoleForm: React.FC<RoleFormProps> = ({
           }
         }}
         submitter={{
-          render: (props, _doms) => {
-            return [
-              <Button key="cancel" onClick={onCancel}>
+          render: (props, _doms) => (
+            <Form.Item {...modalFormSubmitterLayout}>
+              <Button key="cancel" onClick={onCancel} style={{ marginRight: 8 }}>
                 取消
-              </Button>,
+              </Button>
               <Button
                 key="submit"
                 type="primary"
                 onClick={() => props.form?.submit?.()}
               >
                 确定
-              </Button>,
-            ];
-          },
+              </Button>
+            </Form.Item>
+          ),
         }}
       >
         {!isEdit && (
@@ -220,7 +226,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
           ]}
         />
         {canAssignMenus && (
-          <ProForm.Item label="菜单权限">
+          <ProForm.Item label="菜单权限" {...modalFormWideItemLayout}>
             <Tree
               checkable
               treeData={menuTree}

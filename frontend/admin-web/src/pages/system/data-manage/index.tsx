@@ -5,6 +5,7 @@ import {
   getTables,
   loginDataMonitor,
 } from "@/services/antd-gin-api/data_manage";
+import { modalFormLayout } from "@/constants/formLayout";
 import { renderCellText } from "@/utils/tableRender";
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
 import {
@@ -47,7 +48,8 @@ const DataManagePage: React.FC = () => {
       <PageContainer>
         <ProCard>
           <ProForm
-            style={{ maxWidth: 420 }}
+            {...modalFormLayout}
+            style={{ maxWidth: 640 }}
             initialValues={{
               username: "antd-gin",
               password: "antd-gin123",

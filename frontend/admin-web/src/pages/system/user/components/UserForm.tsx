@@ -6,6 +6,10 @@ import type {
   User,
 } from '@/services/antd-gin-api/user';
 import { getUserRoles, setUserRoles } from '@/services/antd-gin-api/user';
+import {
+  modalFormLayout,
+  modalFormSubmitterLayout,
+} from '@/constants/formLayout';
 import type { ProFormInstance } from '@ant-design/pro-components';
 import {
   ProForm,
@@ -13,7 +17,7 @@ import {
   ProFormText,
   ProFormTreeSelect,
 } from '@ant-design/pro-components';
-import { Button, Modal, message } from 'antd';
+import { Button, Form, Modal, message } from 'antd';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 type TreeOption = {
@@ -141,6 +145,7 @@ const UserForm: React.FC<UserFormProps> = ({
       destroyOnHidden
     >
       <ProForm
+        {...modalFormLayout}
         formRef={formRef}
         key={isEdit ? initialValues?.user_code : 'create'}
         initialValues={memoizedInitialValues}
@@ -174,20 +179,20 @@ const UserForm: React.FC<UserFormProps> = ({
           }
         }}
         submitter={{
-          render: (props, _doms) => {
-            return [
-              <Button key="cancel" onClick={onCancel}>
+          render: (props, _doms) => (
+            <Form.Item {...modalFormSubmitterLayout}>
+              <Button key="cancel" onClick={onCancel} style={{ marginRight: 8 }}>
                 取消
-              </Button>,
+              </Button>
               <Button
                 key="submit"
                 type="primary"
                 onClick={() => props.form?.submit?.()}
               >
                 确定
-              </Button>,
-            ];
-          },
+              </Button>
+            </Form.Item>
+          ),
         }}
       >
         {!isEdit && (

@@ -1,8 +1,12 @@
+import {
+  modalFormLayout,
+  modalFormSubmitterLayout,
+} from '@/constants/formLayout';
+import { getDeptTree, type CreateDeptRequest, type Dept, type UpdateDeptRequest } from '@/services/antd-gin-api/dept';
 import { ProForm, ProFormText, ProFormSelect, ProFormTreeSelect } from '@ant-design/pro-components';
 import type { ProFormInstance } from '@ant-design/pro-components';
-import { Button, Modal } from 'antd';
+import { Button, Form, Modal } from 'antd';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { getDeptTree, type CreateDeptRequest, type Dept, type UpdateDeptRequest } from '@/services/antd-gin-api/dept';
 
 type TreeOption = {
   title: string;
@@ -114,6 +118,7 @@ const DeptForm: React.FC<DeptFormProps> = ({
       destroyOnHidden
     >
       <ProForm
+        {...modalFormLayout}
         formRef={formRef}
         key={isEdit ? initialValues?.dept_code : 'create'}
         initialValues={memoizedInitialValues}
@@ -121,16 +126,16 @@ const DeptForm: React.FC<DeptFormProps> = ({
           onSubmit(values as CreateDeptRequest | UpdateDeptRequest);
         }}
         submitter={{
-          render: (props, doms) => {
-            return [
-              <Button key="cancel" onClick={onCancel}>
+          render: (props, _doms) => (
+            <Form.Item {...modalFormSubmitterLayout}>
+              <Button key="cancel" onClick={onCancel} style={{ marginRight: 8 }}>
                 取消
-              </Button>,
+              </Button>
               <Button key="submit" type="primary" onClick={() => props.form?.submit?.()}>
                 确定
-              </Button>,
-            ];
-          },
+              </Button>
+            </Form.Item>
+          ),
         }}
       >
         {!isEdit && (

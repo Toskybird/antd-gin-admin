@@ -1,3 +1,4 @@
+import { searchFormLayout } from '@/constants/formLayout';
 import {
   createUser,
   deleteUser,
@@ -151,7 +152,6 @@ const UserManagement: React.FC = () => {
               key="delete"
               type="link"
               size="small"
-              danger
               onClick={() => handleDelete(record)}
             >
               删除
@@ -167,9 +167,7 @@ const UserManagement: React.FC = () => {
         headerTitle="用户管理"
         actionRef={actionRef}
         rowKey="user_code"
-        search={{
-          labelWidth: 'auto',
-        }}
+        search={{ ...searchFormLayout }}
         toolBarRender={() =>
           canCreate
             ? [

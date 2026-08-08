@@ -10,6 +10,7 @@ import {
   getCacheKeys,
   getCacheValue,
 } from '@/services/antd-gin-api/cache';
+import { searchFormLayout } from '@/constants/formLayout';
 import { hasPermission } from '@/utils/permission';
 import { renderCellText } from '@/utils/tableRender';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
@@ -153,7 +154,6 @@ const CachePage: React.FC = () => {
             <Button
               key="delete"
               type="link"
-              danger
               onClick={() => {
                 Modal.confirm({
                   title: '确认删除',
@@ -241,9 +241,7 @@ const CachePage: React.FC = () => {
             pagination={{
               pageSize: 20,
             }}
-            search={{
-              labelWidth: 90,
-            }}
+            search={{ ...searchFormLayout }}
             request={async (params) => {
               const res = await getCacheKeys({
                 db: currentDB,

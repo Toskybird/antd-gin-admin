@@ -133,7 +133,6 @@ const DeptManagement: React.FC = () => {
             <Button
               type="link"
               size="small"
-              danger
               onClick={() => handleDelete(record)}
             >
               删除

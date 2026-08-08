@@ -9,7 +9,9 @@ import {
 import { useRequest } from '@umijs/max';
 import { Modal, message } from 'antd';
 import React, { cloneElement, useCallback, useState } from 'react';
+import { modalFormLayout } from '@/constants/formLayout';
 import { updateRule } from '@/services/ant-design-pro/api';
+
 export type FormValueType = {
   target?: string;
   template?: string;
@@ -17,11 +19,13 @@ export type FormValueType = {
   time?: string;
   frequency?: string;
 } & Partial<API.RuleListItem>;
+
 export type UpdateFormProps = {
   trigger?: React.ReactElement<any>;
   onOk?: () => void;
   values: Partial<API.RuleListItem>;
 };
+
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
   const { onOk, values, trigger } = props;
   const [open, setOpen] = useState(false);
@@ -43,14 +47,15 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
     setOpen(true);
   }, []);
   const onFinish = useCallback(
-    async (values?: any) => {
+    async (formValues?: any) => {
       await run({
-        data: values,
+        data: formValues,
       });
       onCancel();
     },
     [onCancel, run],
   );
+
   return (
     <>
       {contextHolder}
@@ -82,11 +87,14 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
         }}
         onFinish={onFinish}
       >
-        <StepsForm.StepForm initialValues={values} title={'基本信息'}>
+        <StepsForm.StepForm
+          {...modalFormLayout}
+          initialValues={values}
+          title={'基本信息'}
+        >
           <ProFormText
             name="name"
             label={'规则名称'}
-            width="md"
             rules={[
               {
                 required: true,
@@ -96,7 +104,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           />
           <ProFormTextArea
             name="desc"
-            width="md"
             label={'规则描述'}
             placeholder={'请输入至少五个字符'}
             rules={[
@@ -109,6 +116,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           />
         </StepsForm.StepForm>
         <StepsForm.StepForm
+          {...modalFormLayout}
           initialValues={{
             target: '0',
             template: '0',
@@ -117,7 +125,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
         >
           <ProFormSelect
             name="target"
-            width="md"
             label={'监控对象'}
             valueEnum={{
               0: '表一',
@@ -126,7 +133,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           />
           <ProFormSelect
             name="template"
-            width="md"
             label={'规则模板'}
             valueEnum={{
               0: '规则模板一',
@@ -149,6 +155,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           />
         </StepsForm.StepForm>
         <StepsForm.StepForm
+          {...modalFormLayout}
           initialValues={{
             type: '1',
             frequency: 'month',
@@ -157,7 +164,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
         >
           <ProFormDateTimePicker
             name="time"
-            width="md"
             label={'开始时间'}
             rules={[
               {
@@ -169,7 +175,6 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           <ProFormSelect
             name="frequency"
             label={'监控对象'}
-            width="md"
             valueEnum={{
               month: '月',
               week: '周',
@@ -180,4 +185,5 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
     </>
   );
 };
+
 export default UpdateForm;

@@ -2,6 +2,10 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { Button, Descriptions, Modal, Tag } from 'antd';
 import React, { useRef, useState } from 'react';
+import {
+  searchFormLayout,
+  searchFormWideColSize,
+} from '@/constants/formLayout';
 import type { OperationLog } from '@/services/antd-gin-api/operation_log';
 import { getOperationLogList } from '@/services/antd-gin-api/operation_log';
 
@@ -117,6 +121,7 @@ const OperationLogPage: React.FC = () => {
       dataIndex: 'created_at_range',
       valueType: 'dateTimeRange',
       hideInTable: true,
+      colSize: searchFormWideColSize,
       search: {
         transform: (value: [string, string]) => {
           const [start, end] = value || [];
@@ -155,7 +160,7 @@ const OperationLogPage: React.FC = () => {
         headerTitle="操作日志"
         actionRef={actionRef}
         rowKey="id"
-        search={{ labelWidth: 'auto' }}
+        search={{ ...searchFormLayout }}
         pagination={{
           defaultPageSize: 10,
           showSizeChanger: true,

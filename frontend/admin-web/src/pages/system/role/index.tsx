@@ -3,6 +3,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { Button, message, Modal } from 'antd';
 import React, { useRef, useState } from 'react';
+import { searchFormLayout } from '@/constants/formLayout';
 import {
   createRole,
   deleteRole,
@@ -133,7 +134,6 @@ const RoleManagement: React.FC = () => {
               key="delete"
               type="link"
               size="small"
-              danger
               onClick={() => handleDelete(record)}
             >
               删除
@@ -149,9 +149,7 @@ const RoleManagement: React.FC = () => {
         headerTitle="角色管理"
         actionRef={actionRef}
         rowKey="role_code"
-        search={{
-          labelWidth: 'auto',
-        }}
+        search={{ ...searchFormLayout }}
         toolBarRender={() =>
           canCreate
             ? [
