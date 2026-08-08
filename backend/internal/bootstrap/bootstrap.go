@@ -191,35 +191,6 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 			SortOrder:  254,
 		},
 		{
-			MenuCode:   "scan-detection-rule",
-			ParentCode: "scan",
-			MenuName:   "检测规则",
-			MenuType:   "C",
-			Path:       "/scan/detection-rule",
-			Component:  "/scan/detection-rule",
-			Perms:      "scan:detection-rule:list",
-			Status:     1,
-			SortOrder:  255,
-		},
-		{
-			MenuCode:   "scan-detection-rule-sync",
-			ParentCode: "scan-detection-rule",
-			MenuName:   "同步检测规则",
-			MenuType:   "F",
-			Perms:      "scan:detection-rule:sync",
-			Status:     1,
-			SortOrder:  256,
-		},
-		{
-			MenuCode:   "scan-detection-rule-update",
-			ParentCode: "scan-detection-rule",
-			MenuName:   "启停检测规则",
-			MenuType:   "F",
-			Perms:      "scan:detection-rule:update",
-			Status:     1,
-			SortOrder:  257,
-		},
-		{
 			MenuCode:   "scan-job",
 			ParentCode: "scan",
 			MenuName:   "扫描任务",
@@ -228,7 +199,7 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 			Component:  "/scan/job",
 			Perms:      "scan:job:list",
 			Status:     1,
-			SortOrder:  258,
+			SortOrder:  255,
 		},
 		{
 			MenuCode:   "scan-job-create",
@@ -237,7 +208,7 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 			MenuType:   "F",
 			Perms:      "scan:job:create",
 			Status:     1,
-			SortOrder:  259,
+			SortOrder:  256,
 		},
 		{
 			MenuCode:   "scan-job-cancel",
@@ -246,7 +217,7 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 			MenuType:   "F",
 			Perms:      "scan:job:cancel",
 			Status:     1,
-			SortOrder:  260,
+			SortOrder:  257,
 		},
 		{
 			MenuCode:   "scan-finding",
@@ -256,6 +227,35 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 			Path:       "/scan/finding",
 			Component:  "/scan/finding",
 			Perms:      "scan:finding:list",
+			Status:     1,
+			SortOrder:  258,
+		},
+		{
+			MenuCode:   "scan-detection-rule",
+			ParentCode: "scan",
+			MenuName:   "检测规则",
+			MenuType:   "C",
+			Path:       "/scan/detection-rule",
+			Component:  "/scan/detection-rule",
+			Perms:      "scan:detection-rule:list",
+			Status:     1,
+			SortOrder:  259,
+		},
+		{
+			MenuCode:   "scan-detection-rule-sync",
+			ParentCode: "scan-detection-rule",
+			MenuName:   "同步检测规则",
+			MenuType:   "F",
+			Perms:      "scan:detection-rule:sync",
+			Status:     1,
+			SortOrder:  260,
+		},
+		{
+			MenuCode:   "scan-detection-rule-update",
+			ParentCode: "scan-detection-rule",
+			MenuName:   "启停检测规则",
+			MenuType:   "F",
+			Perms:      "scan:detection-rule:update",
 			Status:     1,
 			SortOrder:  261,
 		},
@@ -582,10 +582,12 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 
 	// 将种子菜单的排序写回数据库（含已存在行），保证「首页 → 仪表盘 → 系统管理」等顺序可随版本校正。
 	seedMenuSort := map[string]int{
-		"welcome": 10, "dashboard": 20, "system": 30, "system-monitor": 40,
+		"welcome": 10, "dashboard": 20, "scan": 25, "system": 30, "system-monitor": 40,
 		"system-user": 31, "system-role": 32, "system-menu": 33, "system-dept": 34,
 		"system-operation-log": 35, "monitor-online-users": 41, "monitor-service": 42,
 		"system-cache": 43, "system-data-manage": 44,
+		"scan-asset": 251, "scan-job": 255, "scan-finding": 258,
+		"scan-detection-rule": 259, "scan-report": 262,
 	}
 	for code, ord := range seedMenuSort {
 		if err := db.WithContext(ctx).Model(&entity.Menu{}).

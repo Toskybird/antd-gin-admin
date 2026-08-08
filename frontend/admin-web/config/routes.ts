@@ -54,6 +54,39 @@ export default [
   },
   { path: '/cockpit', redirect: '/dashboard' },
   {
+    path: '/scan',
+    icon: 'BugOutlined',
+    access: 'canViewScanSection',
+    routes: [
+      { path: '/scan', redirect: '/scan/asset' },
+      {
+        path: '/scan/asset',
+        component: './scan/asset',
+        access: 'canViewScanAsset',
+      },
+      {
+        path: '/scan/job',
+        component: './scan/job',
+        access: 'canViewScanJob',
+      },
+      {
+        path: '/scan/finding',
+        component: './scan/finding',
+        access: 'canViewScanFinding',
+      },
+      {
+        path: '/scan/detection-rule',
+        component: './scan/detection-rule',
+        access: 'canViewScanDetectionRule',
+      },
+      {
+        path: '/scan/report',
+        component: './scan/report',
+        access: 'canViewScanReport',
+      },
+    ],
+  },
+  {
     path: '/system',
     icon: 'setting',
     access: 'canViewSystem',

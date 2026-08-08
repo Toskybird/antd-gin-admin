@@ -39,5 +39,16 @@ export default function access(
     canViewMonitor: hasPermission('system:monitor:view'),
     canViewCache: hasPermission('system:cache:list'),
     canViewData: currentUser?.isSuperAdmin || hasPermission('system:data:view'),
+    canViewScanSection:
+      hasPermission('scan:asset:list') ||
+      hasPermission('scan:job:list') ||
+      hasPermission('scan:finding:list') ||
+      hasPermission('scan:detection-rule:list') ||
+      hasPermission('scan:report:list'),
+    canViewScanAsset: hasPermission('scan:asset:list'),
+    canViewScanJob: hasPermission('scan:job:list'),
+    canViewScanFinding: hasPermission('scan:finding:list'),
+    canViewScanDetectionRule: hasPermission('scan:detection-rule:list'),
+    canViewScanReport: hasPermission('scan:report:list'),
   };
 }
