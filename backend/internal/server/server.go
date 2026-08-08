@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
+	"antd-gin-admin-backend/internal/api/v1/scan"
 	"antd-gin-admin-backend/internal/api/v1/system"
 	"antd-gin-admin-backend/internal/bootstrap"
 	"antd-gin-admin-backend/internal/config"
@@ -15,6 +16,7 @@ import (
 	repoDB "antd-gin-admin-backend/internal/repository/db"
 	repoInterfaces "antd-gin-admin-backend/internal/repository/interfaces"
 	repoMock "antd-gin-admin-backend/internal/repository/mock"
+	assetsvc "antd-gin-admin-backend/internal/service/asset"
 	authsvc "antd-gin-admin-backend/internal/service/auth"
 	cachesvc "antd-gin-admin-backend/internal/service/cache"
 	dataManageSvc "antd-gin-admin-backend/internal/service/data_manage"
@@ -91,6 +93,7 @@ func Run(cfg *config.Config) error {
 	var roleDeptRepo repoInterfaces.RoleDeptRepository
 	var operationLogRepo repoInterfaces.OperationLogRepository
 	var dbMetaRepo repoInterfaces.DBMetaRepository
+	var assetRepo repoInterfaces.AssetRepository
 	if cfg.Auth.UseMock {
 		authRepo = repoMock.NewAuthMockRepository()
 	} else {
@@ -104,6 +107,7 @@ func Run(cfg *config.Config) error {
 		roleDeptRepo = repoDB.NewRoleDeptRepository(db)
 		operationLogRepo = repoDB.NewOperationLogRepository(db)
 		dbMetaRepo = repoDB.NewDBMetaRepository(db)
+		assetRepo = repoDB.NewAssetRepository(db)
 	}
 	authSvc := authsvc.New(authRepo, cfg.JWT.Secret, cfg.JWT.Issuer, cfg.JWT.ExpireTime)
 	var userSvc serviceInterfaces.UserService
@@ -162,9 +166,15 @@ func Run(cfg *config.Config) error {
 	cacheSvcVar := cachesvc.New(redisClient)
 	authMiddleware := middleware.Auth(cfg.JWT.Secret, monitorSvcVar)
 
+	var assetSvcVar serviceInterfaces.AssetService
+	if assetRepo != nil {
+		assetSvcVar = assetsvc.New(assetRepo)
+	}
+
 	api := engine.Group("/api/v1")
 	{
 		system.RegisterRoutes(api, authSvc, authMiddleware, permissionSvcVar, dataScopeSvcVar, profileSvc, userSvc, roleSvc, menuSvc, deptSvc, userRoleSvcVar, roleMenuSvcVar, roleDeptSvcVar, operationLogSvcVar, monitorSvcVar, dataManageSvcVar, cacheSvcVar)
+		scan.RegisterRoutes(api, authMiddleware, permissionSvcVar, dataScopeSvcVar, assetSvcVar)
 	}
 
 	port := cfg.Server.Port
