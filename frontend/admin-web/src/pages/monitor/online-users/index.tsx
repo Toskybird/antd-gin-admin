@@ -131,7 +131,6 @@ const OnlineUsersPage: React.FC = () => {
               key="force"
               type="link"
               size="small"
-              danger
               onClick={() => {
                 Modal.confirm({
                   title: '确认强退',
@@ -163,7 +162,11 @@ const OnlineUsersPage: React.FC = () => {
         rowKey="session_id"
         search={false}
         scroll={{ x: 1600 }}
-        toolBarRender={false}
+        options={{
+          reload: true,
+          density: true,
+          setting: true,
+        }}
         request={async () => {
           const res = await getOnlineUsers();
           return {

@@ -33,6 +33,43 @@ func AutoMigrate(db *gorm.DB) error {
 	)
 }
 
+// DropScanArtifacts removes legacy Web 扫描 tables and menu seeds (ADR-0004).
+func DropScanArtifacts(db *gorm.DB) error {
+	if db == nil {
+		return nil
+	}
+	tables := []string{
+		"scan_reports",
+		"scan_findings",
+		"scan_jobs",
+		"scan_detection_rules",
+		"scan_assets",
+	}
+	for _, table := range tables {
+		if err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s CASCADE", table)).Error; err != nil {
+			return fmt.Errorf("drop %s: %w", table, err)
+		}
+	}
+
+	var menuCodes []string
+	if db.Migrator().HasTable(&entity.Menu{}) {
+		if err := db.Unscoped().Model(&entity.Menu{}).
+			Where("menu_code LIKE ? OR path LIKE ? OR perms LIKE ?", "scan%", "/scan%", "scan:%").
+			Pluck("menu_code", &menuCodes).Error; err != nil {
+			return fmt.Errorf("query scan menus: %w", err)
+		}
+	}
+	if len(menuCodes) > 0 {
+		if err := db.Where("menu_code IN ?", menuCodes).Delete(&entity.RoleMenu{}).Error; err != nil {
+			return fmt.Errorf("delete scan role_menu: %w", err)
+		}
+		if err := db.Unscoped().Where("menu_code IN ?", menuCodes).Delete(&entity.Menu{}).Error; err != nil {
+			return fmt.Errorf("delete scan menus: %w", err)
+		}
+	}
+	return nil
+}
+
 // EnsureAdminUser seeds a default admin user if not exists.
 func EnsureAdminUser(db *gorm.DB, cfg *config.Config) error {
 	if cfg == nil || cfg.Bootstrap.AdminUsername == "" || cfg.Bootstrap.AdminPassword == "" {

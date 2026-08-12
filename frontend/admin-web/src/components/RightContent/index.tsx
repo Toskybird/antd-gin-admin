@@ -1,21 +1,13 @@
 import { DEFAULT_THEME, LEGACY_THEME_KEY, THEME } from '@/constant/theme';
 import {
-  applyZoom,
-  resolveZoom,
-  setZoom,
-  type ZoomPercent,
-  ZOOM_PRESETS,
-} from '@/utils/zoom';
-import {
   MenuOutlined,
   QuestionCircleOutlined,
   SunOutlined,
-  ZoomInOutlined,
 } from '@ant-design/icons';
 import { useModel } from '@umijs/max';
 import { Dropdown } from 'antd';
-import type { FC, MenuProps } from 'react';
-import { useEffect, useState } from 'react';
+import type { FC } from 'react';
+import { useEffect } from 'react';
 
 export type SiderTheme = 'light' | 'dark';
 
@@ -127,47 +119,6 @@ export const SelectTheme = ({
       }}
     >
       <SunOutlined style={{ marginRight: 8, fontSize: 18, cursor: 'pointer' }} />
-    </Dropdown>
-  );
-};
-
-export const SelectZoom = () => {
-  const [zoom, setZoomState] = useState<ZoomPercent>(() => resolveZoom());
-
-  useEffect(() => {
-    applyZoom(zoom);
-  }, [zoom]);
-
-  const items: MenuProps['items'] = [
-    ...ZOOM_PRESETS.map((percent) => ({
-      label: `${percent}%`,
-      key: String(percent),
-    })),
-    { type: 'divider' as const },
-    {
-      key: 'hint',
-      label: '也可使用浏览器 Ctrl / ⌘ +/-',
-      disabled: true,
-    },
-  ];
-
-  return (
-    <Dropdown
-      menu={{
-        items,
-        selectable: true,
-        selectedKeys: [String(zoom)],
-        onClick: (e) => {
-          if (e.key === 'hint') {
-            return;
-          }
-          const next = Number(e.key) as ZoomPercent;
-          setZoom(next);
-          setZoomState(next);
-        },
-      }}
-    >
-      <ZoomInOutlined style={{ marginRight: 8, fontSize: 18, cursor: 'pointer' }} />
     </Dropdown>
   );
 };

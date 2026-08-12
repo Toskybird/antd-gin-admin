@@ -5,7 +5,10 @@ import {
   getTables,
   loginDataMonitor,
 } from "@/services/antd-gin-api/data_manage";
-import { modalFormLayout } from "@/constants/formLayout";
+import {
+  modalFormLayout,
+  modalFormSubmitterLayout,
+} from "@/constants/formLayout";
 import { renderCellText } from "@/utils/tableRender";
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
 import {
@@ -15,7 +18,7 @@ import {
   ProFormText,
   ProTable,
 } from "@ant-design/pro-components";
-import { Button, message, Modal } from "antd";
+import { Button, Form, message, Modal } from "antd";
 import React, { useEffect, useRef, useState } from "react";
 
 const DataManagePage: React.FC = () => {
@@ -46,7 +49,7 @@ const DataManagePage: React.FC = () => {
   if (!authenticated) {
     return (
       <PageContainer>
-        <ProCard>
+        <ProCard title="数据监控">
           <ProForm
             {...modalFormLayout}
             style={{ maxWidth: 640 }}
@@ -65,6 +68,26 @@ const DataManagePage: React.FC = () => {
                 return true;
               }
               return false;
+            }}
+            submitter={{
+              render: (props, _doms) => (
+                <Form.Item {...modalFormSubmitterLayout}>
+                  <Button
+                    key="reset"
+                    onClick={() => props.form?.resetFields?.()}
+                    style={{ marginRight: 8 }}
+                  >
+                    重置
+                  </Button>
+                  <Button
+                    key="submit"
+                    type="primary"
+                    onClick={() => props.form?.submit?.()}
+                  >
+                    提交
+                  </Button>
+                </Form.Item>
+              ),
             }}
           >
             <ProFormText
@@ -175,7 +198,7 @@ const DataManagePage: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProCard split="vertical" bordered>
+      <ProCard title="数据监控" split="vertical" bordered>
         <ProCard title="数据表" colSpan="40%">
           <ProTable<TableMeta>
             rowKey="table_name"

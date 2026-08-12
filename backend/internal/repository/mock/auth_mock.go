@@ -21,12 +21,13 @@ func NewAuthMockRepository() interfaces.AuthRepository {
 	return &AuthMockRepository{
 		users: map[string]*entity.User{
 			"admin": {
-				ID:       1,
-				UserCode: "U0001",
-				Username: "admin",
-				Nickname: "Administrator",
-				Password: string(hash),
-				Status:   1,
+				ID:           1,
+				UserCode:     "U0001",
+				Username:     "admin",
+				Nickname:     "Administrator",
+				Password:     string(hash),
+				Status:       1,
+				IsSuperAdmin: true,
 			},
 		},
 	}

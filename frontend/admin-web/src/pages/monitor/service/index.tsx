@@ -1,11 +1,13 @@
 import type { DatabaseStats } from "@/services/antd-gin-api/monitor";
 import { getDatabaseStats } from "@/services/antd-gin-api/monitor";
 import { renderCellText } from "@/utils/tableRender";
-import type { ProColumns } from "@ant-design/pro-components";
+import type { ActionType, ProColumns } from "@ant-design/pro-components";
 import { PageContainer, ProTable } from "@ant-design/pro-components";
-import React from "react";
+import React, { useRef } from "react";
 
 const ServiceMonitorPage: React.FC = () => {
+  const actionRef = useRef<ActionType>(null);
+
   const columns: ProColumns<DatabaseStats>[] = [
     {
       title: "状态",
@@ -66,12 +68,16 @@ const ServiceMonitorPage: React.FC = () => {
   return (
     <PageContainer>
       <ProTable<DatabaseStats>
+        actionRef={actionRef}
         headerTitle="服务监控"
         rowKey="database"
         search={false}
-        options={false}
         pagination={false}
-        toolBarRender={false}
+        options={{
+          reload: true,
+          density: true,
+          setting: true,
+        }}
         request={async () => {
           const res = await getDatabaseStats();
           return {

@@ -7,12 +7,7 @@
  */
 import Footer from './Footer';
 import { AvatarDropdown, AvatarName } from './RightContent/AvatarDropdown';
-import {
-  Question,
-  SelectLayout,
-  SelectTheme,
-  SelectZoom,
-} from './RightContent';
+import { Question, SelectLayout, SelectTheme } from './RightContent';
 export {
   AvatarDropdown,
   AvatarName,
@@ -20,5 +15,4 @@ export {
   Question,
   SelectLayout,
   SelectTheme,
-  SelectZoom,
 };

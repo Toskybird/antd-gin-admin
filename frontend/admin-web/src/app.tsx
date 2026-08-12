@@ -4,13 +4,11 @@ import {
   Footer,
   SelectLayout,
   SelectTheme,
-  SelectZoom,
 } from '@/components';
 import { resolveLayoutType } from '@/components/RightContent';
 import { DEFAULT_THEME, LEGACY_THEME_KEY, PRIMARY_COLOR, THEME } from '@/constant/theme';
 import { currentUser as queryCurrentUser } from '@/services/ant-design-pro/api';
 import { getMenuTree, type Menu as APIMenu } from '@/services/antd-gin-api/menu';
-import { applyZoom, resolveZoom } from '@/utils/zoom';
 import type {
   Settings as LayoutSettings,
   MenuDataItem,
@@ -53,7 +51,12 @@ const buildSettings = (themeKey: ThemeKey): AppSettings =>
 
 if (typeof document !== 'undefined') {
   document.documentElement.setAttribute('data-theme', resolveThemeKey());
-  applyZoom(resolveZoom());
+  // Clear legacy in-app zoom (removed); avoid leftover CSS from older sessions.
+  const root = document.documentElement;
+  root.style.removeProperty('zoom');
+  root.style.removeProperty('transform');
+  root.style.removeProperty('transform-origin');
+  localStorage.removeItem('app-zoom');
 }
 
 /**
@@ -168,7 +171,6 @@ export const layout: RunTimeLayoutConfig = ({
           window.location.reload();
         }}
       />,
-      <SelectZoom key="SelectZoom" />,
     ],
     avatarProps: {
       src: initialState?.currentUser?.avatar,

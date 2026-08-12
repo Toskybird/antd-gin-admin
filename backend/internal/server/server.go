@@ -65,6 +65,9 @@ func Run(cfg *config.Config) error {
 		if err := bootstrap.AutoMigrate(db); err != nil {
 			return err
 		}
+		if err := bootstrap.DropScanArtifacts(db); err != nil {
+			return err
+		}
 		if err := bootstrap.ApplySchemaComments(db); err != nil {
 			return err
 		}

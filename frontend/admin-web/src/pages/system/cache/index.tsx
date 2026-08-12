@@ -182,7 +182,7 @@ const CachePage: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProCard split="vertical" bordered>
+      <ProCard title="缓存监控" split="vertical" bordered>
         <ProCard title="Redis 库" colSpan="28%">
           <ProTable<CacheDatabase>
             rowKey="db"
