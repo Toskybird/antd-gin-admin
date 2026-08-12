@@ -5,7 +5,6 @@ import { request, useModel } from '@umijs/max';
 import { Button, Col, Row, Space, Spin, Table, Tag, Typography } from 'antd';
 import type { EChartsOption } from 'echarts';
 import * as echarts from 'echarts';
-import 'echarts-gl';
 import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GeoAccessSummary } from '@/services/antd-gin-api/dashboard';
@@ -84,49 +83,6 @@ function ChartShell({
   return <div ref={ref} style={style} />;
 }
 
-function createWorldBaseTexture() {
-  const canvas = document.createElement('canvas');
-  const chart = echarts.init(canvas, undefined, {
-    renderer: 'canvas',
-    width: 4096,
-    height: 2048,
-  });
-
-  chart.setOption({
-    animation: false,
-    backgroundColor: '#06111f',
-    geo: {
-      type: 'map',
-      map: 'world',
-      roam: false,
-      left: 0,
-      top: 0,
-      right: 0,
-      bottom: 0,
-      boundingCoords: [
-        [-180, 90],
-        [180, -90],
-      ],
-      itemStyle: {
-        areaColor: '#13223a',
-        borderColor: 'rgba(125,211,252,0.55)',
-        borderWidth: 0.65,
-      },
-      emphasis: { disabled: true },
-    },
-    series: [
-      {
-        type: 'map',
-        map: 'world',
-        geoIndex: 0,
-        silent: true,
-      },
-    ],
-  } as EChartsOption);
-
-  return { canvas, chart };
-}
-
 const Dashboard: React.FC = () => {
   const { initialState } = useModel('@@initialState');
   const currentUser = initialState?.currentUser;
@@ -143,10 +99,9 @@ const Dashboard: React.FC = () => {
   const [cacheStats, setCacheStats] = useState<CacheStats | null>(null);
   const [dbStats, setDbStats] = useState<DatabaseStats | null>(null);
   const [geoSummary, setGeoSummary] = useState<GeoAccessSummary | null>(null);
-  const [worldBaseTexture, setWorldBaseTexture] = useState<HTMLCanvasElement | null>(null);
+  const [worldMapReady, setWorldMapReady] = useState(false);
 
   const boardRef = useRef<HTMLDivElement>(null);
-  const worldTextureChartRef = useRef<ReturnType<typeof echarts.init> | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
@@ -261,20 +216,15 @@ const Dashboard: React.FC = () => {
           return;
         }
         echarts.registerMap('world', geojson as never);
-        worldTextureChartRef.current?.dispose();
-        const { canvas, chart } = createWorldBaseTexture();
-        worldTextureChartRef.current = chart;
-        setWorldBaseTexture(canvas);
+        setWorldMapReady(true);
       })
       .catch(() => {
         if (mounted) {
-          setWorldBaseTexture(null);
+          setWorldMapReady(false);
         }
       });
     return () => {
       mounted = false;
-      worldTextureChartRef.current?.dispose();
-      worldTextureChartRef.current = null;
     };
   }, []);
 
@@ -349,83 +299,76 @@ const Dashboard: React.FC = () => {
   );
 
   const geoMapOption: DashboardChartOption = useMemo(() => {
-    const points = (geoSummary?.countries || []).filter((x) => Number.isFinite(x.lat) && Number.isFinite(x.lon));
+    const points = (geoSummary?.countries || []).filter(
+      (x) => Number.isFinite(x.lat) && Number.isFinite(x.lon),
+    );
     const maxCount = Math.max(1, ...points.map((x) => x.count || 0));
 
-    // 无纹理时仍渲染 globe（白球效果）；有纹理则贴图
     return {
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'item',
-        formatter: (params: { name?: string; value?: unknown }) => {
-          const val = Array.isArray(params.value) ? params.value : [];
-          const count = typeof val[2] === 'number' ? val[2] : 0;
-          return `${params.name || '未知'}<br/>访问量：${count}`;
+        backgroundColor: 'rgba(15,23,42,0.92)',
+        borderColor: 'rgba(56,189,248,0.35)',
+        textStyle: { color: '#e2e8f0' },
+        formatter: (params: { name?: string; value?: unknown; seriesType?: string }) => {
+          if (params.seriesType === 'effectScatter' || params.seriesType === 'scatter') {
+            const val = Array.isArray(params.value) ? params.value : [];
+            const count = typeof val[2] === 'number' ? val[2] : 0;
+            return `${params.name || '未知'}<br/>访问量：${count}`;
+          }
+          return params.name || '';
         },
       },
-      globe: {
-        ...(worldBaseTexture ? { baseTexture: worldBaseTexture } : {}),
-        shading: 'realistic',
-        realisticMaterial: {
-          roughness: 0.72,
-          metalness: 0,
+      geo: {
+        map: 'world',
+        roam: true,
+        scaleLimit: { min: 1, max: 8 },
+        left: 8,
+        right: 8,
+        top: 8,
+        bottom: 8,
+        itemStyle: {
+          areaColor: '#13223a',
+          borderColor: 'rgba(125,211,252,0.45)',
+          borderWidth: 0.6,
         },
-        atmosphere: {
-          show: true,
-          color: '#22d3ee',
-          offset: 5,
-        },
-        light: {
-          ambient: { intensity: 0.72 },
-          main: {
-            intensity: 1.25,
-            shadow: true,
-            alpha: 32,
-            beta: 145,
+        emphasis: {
+          itemStyle: {
+            areaColor: '#1e3a5f',
           },
+          label: { show: false },
         },
-        viewControl: {
-          autoRotate: true,
-          autoRotateAfterStill: 2,
-          autoRotateSpeed: 2.2,
-          alpha: 22,
-          beta: -150,
-          distance: 145,
-          minDistance: 95,
-          maxDistance: 210,
-        },
-        postEffect: {
-          enable: true,
-          bloom: { enable: true, intensity: 0.14 },
-        },
-        temporalSuperSampling: { enable: true },
       },
       series: [
         {
           name: '访问点位',
-          type: 'scatter3D',
-          coordinateSystem: 'globe',
-          blendMode: 'lighter',
+          type: 'effectScatter',
+          coordinateSystem: 'geo',
+          rippleEffect: {
+            brushType: 'stroke',
+            scale: 3.2,
+            period: 4,
+          },
           data: points.map((x) => ({
             name: x.country,
             value: [x.lon, x.lat, Math.max(1, x.count)],
           })),
           symbolSize: (val: unknown) => {
             const count = Array.isArray(val) && typeof val[2] === 'number' ? val[2] : 1;
-            return Math.max(7, Math.min(28, 7 + (count / maxCount) * 18));
+            return Math.max(6, Math.min(22, 6 + (count / maxCount) * 14));
           },
           itemStyle: {
             color: '#67e8f9',
-            opacity: 0.96,
-            borderColor: '#e0f2fe',
-            borderWidth: 0.8,
+            shadowBlur: 10,
+            shadowColor: 'rgba(103,232,249,0.65)',
           },
           label: {
-            show: points.length <= 6,
+            show: points.length <= 8,
             formatter: '{b}',
             color: '#bae6fd',
-            distance: 4,
             fontSize: 10,
+            position: 'right',
           },
           emphasis: {
             label: { show: true },
@@ -434,7 +377,7 @@ const Dashboard: React.FC = () => {
         },
       ],
     };
-  }, [geoSummary, worldBaseTexture]);
+  }, [geoSummary]);
 
   const topCountries = useMemo(() => (geoSummary?.countries || []).slice(0, 5), [geoSummary]);
 
@@ -652,7 +595,13 @@ const Dashboard: React.FC = () => {
             <Col xs={24} lg={7}>
               <div className="board-panel" style={{ paddingBottom: 8 }}>
                 <div className="board-chart-title">用户全球访问分布（近 24h）</div>
-                <ChartShell option={geoMapOption} style={{ height: 280 }} />
+                {worldMapReady ? (
+                  <ChartShell option={geoMapOption} style={{ height: 280 }} />
+                ) : (
+                  <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(148,163,184,0.75)' }}>
+                    地图加载中…
+                  </div>
+                )}
                 <div style={{ padding: '0 12px 10px' }}>
                   <div style={{ fontSize: 12, color: 'rgba(148,163,184,0.85)', marginBottom: 8 }}>国家访问 TOP5</div>
                   {topCountries.length === 0 ? (

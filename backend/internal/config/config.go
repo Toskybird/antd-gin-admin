@@ -55,11 +55,6 @@ type Config struct {
 		FilePath      string `mapstructure:"file_path"`
 		MaxSizeMB     int    `mapstructure:"max_size_mb"`
 	} `mapstructure:"log"`
-	Scan struct {
-		NucleiBin       string `mapstructure:"nuclei_bin"`
-		NucleiTemplates string `mapstructure:"nuclei_templates"`
-		Engine          string `mapstructure:"engine"` // auto | nuclei | fake
-	} `mapstructure:"scan"`
 }
 
 // Load loads configuration from file and environment variables.

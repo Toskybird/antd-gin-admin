@@ -2,7 +2,7 @@
 # 用于完全免费且无需信用卡的平台（ClawCloud Run、Koyeb 等）
 
 # 构建阶段
-FROM crpi-4otucz63tm2q5dhq.cn-beijing.personal.cr.aliyuncs.com/library-shiyu/golang:1.23-alpine AS builder
+FROM crpi-4otucz63tm2q5dhq.cn-beijing.personal.cr.aliyuncs.com/library-shiyu/golang:1.24-alpine AS builder
 
 WORKDIR /app
 

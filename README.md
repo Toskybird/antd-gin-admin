@@ -10,6 +10,8 @@
 
 ## 快速开始
 
+### 方式一：Compose 一键启动（全栈）
+
 前置：已安装 Docker Desktop 或 Docker Engine 20.10+，以及 Docker Compose 2.0+。
 
 ```bash
@@ -26,7 +28,58 @@ docker-compose up -d
 | 后端 API | http://localhost:18080 |
 | 健康检查 | http://localhost:18080/api/v1/system/health |
 
-默认账号（启动时自动种子写入）：
+### 方式二：本地开发启动（推荐调试）
+
+前置（本机自行安装并启动，**不使用 Docker**）：
+
+| 依赖 | 建议版本 | 常用本地端口 | 说明 |
+| --- | --- | --- | --- |
+| Go | 1.24+ | — | 后端 |
+| Node.js | 18+（推荐 pnpm） | — | 前端 |
+| PostgreSQL | 12+ | `5432` | 建库见下方示例 |
+| Redis | 6+ | `6379` | 无密码即可 |
+
+```bash
+git clone https://github.com/Toskybird/antd-gin-admin.git
+cd antd-gin-admin
+
+# 1) 准备数据库（按你的本地 Postgres 账号调整）
+createdb antd_gin_admin_scaffold   # 或用 psql / GUI 创建同名库
+
+# 2) 对齐本地配置：编辑 backend/configs/config.yaml
+#    database.host/port/username/password/database
+#    redis.host/port
+#    示例（常见本机默认端口）：
+#      database.port: 5432
+#      redis.port: 6379
+
+# 3) 后端（默认读取 backend/configs/config.yaml → :8080）
+cd backend
+export GOPROXY=https://goproxy.cn,direct   # 国内网络可选
+go run ./cmd/server
+
+# 4) 前端（另开终端；dev 代理 /api → http://localhost:8080）
+cd frontend/admin-web
+pnpm install
+pnpm run dev
+```
+
+本地访问：
+
+| 服务 | 地址 |
+| --- | --- |
+| 前端管理台 | http://localhost:8000 |
+| 后端 API | http://localhost:8080 |
+| 健康检查 | http://localhost:8080/api/v1/system/health |
+
+说明：
+
+- 仓库默认 `config.yaml` 可能指向 Compose 映射端口（如 `15432` / `16379`）；**方式二请改成本机实际端口与账号**。
+- 首次启动会自动迁移并种子写入默认账号。
+
+### 默认账号
+
+启动时自动种子写入：
 
 | 用户名 | 密码 | 说明 |
 | --- | --- | --- |
@@ -34,6 +87,19 @@ docker-compose up -d
 | `user` | `User@123` | 普通用户（`ROLE_VIEWER`） |
 
 更完整的 Compose 说明见 [docker-compose.README.md](./docker-compose.README.md)；后端认证与权限细节见 [backend/README.md](./backend/README.md)。
+
+
+## 产品截图
+![登录](./assets/readme/login.png)
+
+![首页](./assets/readme/main.png)
+
+![仪表盘](./assets/readme/dashboard.png)
+
+![用户管理](./assets/readme/user.png)
+
+![用户配置](./assets/readme/useredit.png)
+
 
 ## 核心设计理念
 
@@ -70,7 +136,7 @@ docker-compose up -d
 
 | 技术         | 版本    | 用途     |
 | ---------- | ----- | ------ |
-| Go         | 1.21+ | 主要编程语言 |
+| Go         | 1.24+ | 主要编程语言 |
 | Gin        | 1.9+  | Web框架  |
 | GORM       | 1.25+ | ORM框架  |
 | PostgreSQL | 12+   | 主数据库   |

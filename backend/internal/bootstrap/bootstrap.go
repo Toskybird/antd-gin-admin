@@ -30,12 +30,44 @@ func AutoMigrate(db *gorm.DB) error {
 		&entity.RoleMenu{},
 		&entity.RoleDept{},
 		&entity.OperationLog{},
-		&entity.Asset{},
-		&entity.DetectionRule{},
-		&entity.ScanJob{},
-		&entity.Finding{},
-		&entity.ScanReport{},
 	)
+}
+
+// DropScanArtifacts removes legacy Web 扫描 tables and menu seeds (ADR-0004).
+func DropScanArtifacts(db *gorm.DB) error {
+	if db == nil {
+		return nil
+	}
+	tables := []string{
+		"scan_reports",
+		"scan_findings",
+		"scan_jobs",
+		"scan_detection_rules",
+		"scan_assets",
+	}
+	for _, table := range tables {
+		if err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s CASCADE", table)).Error; err != nil {
+			return fmt.Errorf("drop %s: %w", table, err)
+		}
+	}
+
+	var menuCodes []string
+	if db.Migrator().HasTable(&entity.Menu{}) {
+		if err := db.Unscoped().Model(&entity.Menu{}).
+			Where("menu_code LIKE ? OR path LIKE ? OR perms LIKE ?", "scan%", "/scan%", "scan:%").
+			Pluck("menu_code", &menuCodes).Error; err != nil {
+			return fmt.Errorf("query scan menus: %w", err)
+		}
+	}
+	if len(menuCodes) > 0 {
+		if err := db.Where("menu_code IN ?", menuCodes).Delete(&entity.RoleMenu{}).Error; err != nil {
+			return fmt.Errorf("delete scan role_menu: %w", err)
+		}
+		if err := db.Unscoped().Where("menu_code IN ?", menuCodes).Delete(&entity.Menu{}).Error; err != nil {
+			return fmt.Errorf("delete scan menus: %w", err)
+		}
+	}
+	return nil
 }
 
 // EnsureAdminUser seeds a default admin user if not exists.
@@ -143,141 +175,6 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 			Perms:     "dashboard:view",
 			Status:    1,
 			SortOrder: 20,
-		},
-		{
-			MenuCode:  "scan",
-			MenuName:  "漏洞扫描",
-			MenuType:  "M",
-			Path:      "/scan",
-			Status:    1,
-			SortOrder: 25,
-		},
-		{
-			MenuCode:   "scan-asset",
-			ParentCode: "scan",
-			MenuName:   "资产",
-			MenuType:   "C",
-			Path:       "/scan/asset",
-			Component:  "/scan/asset",
-			Perms:      "scan:asset:list",
-			Status:     1,
-			SortOrder:  251,
-		},
-		{
-			MenuCode:   "scan-asset-create",
-			ParentCode: "scan-asset",
-			MenuName:   "新建资产",
-			MenuType:   "F",
-			Perms:      "scan:asset:create",
-			Status:     1,
-			SortOrder:  252,
-		},
-		{
-			MenuCode:   "scan-asset-update",
-			ParentCode: "scan-asset",
-			MenuName:   "编辑资产",
-			MenuType:   "F",
-			Perms:      "scan:asset:update",
-			Status:     1,
-			SortOrder:  253,
-		},
-		{
-			MenuCode:   "scan-asset-delete",
-			ParentCode: "scan-asset",
-			MenuName:   "删除资产",
-			MenuType:   "F",
-			Perms:      "scan:asset:delete",
-			Status:     1,
-			SortOrder:  254,
-		},
-		{
-			MenuCode:   "scan-job",
-			ParentCode: "scan",
-			MenuName:   "扫描任务",
-			MenuType:   "C",
-			Path:       "/scan/job",
-			Component:  "/scan/job",
-			Perms:      "scan:job:list",
-			Status:     1,
-			SortOrder:  255,
-		},
-		{
-			MenuCode:   "scan-job-create",
-			ParentCode: "scan-job",
-			MenuName:   "创建扫描",
-			MenuType:   "F",
-			Perms:      "scan:job:create",
-			Status:     1,
-			SortOrder:  256,
-		},
-		{
-			MenuCode:   "scan-job-cancel",
-			ParentCode: "scan-job",
-			MenuName:   "取消扫描",
-			MenuType:   "F",
-			Perms:      "scan:job:cancel",
-			Status:     1,
-			SortOrder:  257,
-		},
-		{
-			MenuCode:   "scan-finding",
-			ParentCode: "scan",
-			MenuName:   "发现项",
-			MenuType:   "C",
-			Path:       "/scan/finding",
-			Component:  "/scan/finding",
-			Perms:      "scan:finding:list",
-			Status:     1,
-			SortOrder:  258,
-		},
-		{
-			MenuCode:   "scan-detection-rule",
-			ParentCode: "scan",
-			MenuName:   "检测规则",
-			MenuType:   "C",
-			Path:       "/scan/detection-rule",
-			Component:  "/scan/detection-rule",
-			Perms:      "scan:detection-rule:list",
-			Status:     1,
-			SortOrder:  259,
-		},
-		{
-			MenuCode:   "scan-detection-rule-sync",
-			ParentCode: "scan-detection-rule",
-			MenuName:   "同步检测规则",
-			MenuType:   "F",
-			Perms:      "scan:detection-rule:sync",
-			Status:     1,
-			SortOrder:  260,
-		},
-		{
-			MenuCode:   "scan-detection-rule-update",
-			ParentCode: "scan-detection-rule",
-			MenuName:   "启停检测规则",
-			MenuType:   "F",
-			Perms:      "scan:detection-rule:update",
-			Status:     1,
-			SortOrder:  261,
-		},
-		{
-			MenuCode:   "scan-report",
-			ParentCode: "scan",
-			MenuName:   "扫描报告",
-			MenuType:   "C",
-			Path:       "/scan/report",
-			Component:  "/scan/report",
-			Perms:      "scan:report:list",
-			Status:     1,
-			SortOrder:  262,
-		},
-		{
-			MenuCode:   "scan-report-create",
-			ParentCode: "scan-report",
-			MenuName:   "生成报告",
-			MenuType:   "F",
-			Perms:      "scan:report:create",
-			Status:     1,
-			SortOrder:  263,
 		},
 		{
 			MenuCode:  "system",
@@ -582,12 +479,10 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 
 	// 将种子菜单的排序写回数据库（含已存在行），保证「首页 → 仪表盘 → 系统管理」等顺序可随版本校正。
 	seedMenuSort := map[string]int{
-		"welcome": 10, "dashboard": 20, "scan": 25, "system": 30, "system-monitor": 40,
+		"welcome": 10, "dashboard": 20, "system": 30, "system-monitor": 40,
 		"system-user": 31, "system-role": 32, "system-menu": 33, "system-dept": 34,
 		"system-operation-log": 35, "monitor-online-users": 41, "monitor-service": 42,
 		"system-cache": 43, "system-data-manage": 44,
-		"scan-asset": 251, "scan-job": 255, "scan-finding": 258,
-		"scan-detection-rule": 259, "scan-report": 262,
 	}
 	for code, ord := range seedMenuSort {
 		if err := db.WithContext(ctx).Model(&entity.Menu{}).

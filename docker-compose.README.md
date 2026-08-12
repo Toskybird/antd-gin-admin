@@ -12,38 +12,38 @@
 ### 1. 启动所有服务
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ### 2. 查看服务状态
 
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
 ### 3. 查看日志
 
 ```bash
 # 查看所有服务日志
-docker-compose logs -f
+docker compose logs -f
 
 # 查看特定服务日志
-docker-compose logs -f antd-gin-backend
-docker-compose logs -f antd-gin-frontend
-docker-compose logs -f antd-gin-postgres
-docker-compose logs -f antd-gin-redis
+docker compose logs -f antd-gin-backend
+docker compose logs -f antd-gin-frontend
+docker compose logs -f antd-gin-postgres
+docker compose logs -f antd-gin-redis
 ```
 
 ### 4. 停止所有服务
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### 5. 停止并删除数据卷（清理数据）
 
 ```bash
-docker-compose down -v
+docker compose down -v
 ```
 
 ## 服务说明
@@ -77,7 +77,7 @@ docker-compose down -v
 如果只想启动数据库和 Redis，用于本地开发：
 
 ```bash
-docker-compose up -d antd-gin-postgres antd-gin-redis
+docker compose up -d antd-gin-postgres antd-gin-redis
 ```
 
 然后确认后端配置文件 `backend/configs/config.yaml`：
@@ -91,14 +91,14 @@ docker-compose up -d antd-gin-postgres antd-gin-redis
 
 ```bash
 # 重新构建所有服务
-docker-compose build
+docker compose build
 
 # 重新构建特定服务
-docker-compose build antd-gin-backend
-docker-compose build antd-gin-frontend
+docker compose build antd-gin-backend
+docker compose build antd-gin-frontend
 
 # 重新构建并启动
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ## 数据持久化
@@ -111,14 +111,14 @@ docker-compose up -d --build
 即使删除容器，数据也会保留。要完全清理数据，使用：
 
 ```bash
-docker-compose down -v
+docker compose down -v
 ```
 
 ## 故障排查
 
 ### 1. 端口冲突
 
-如果端口被占用，可以修改 `docker-compose.yml` 中的端口映射：
+如果端口被占用，可以修改 `docker compose.yml` 中的端口映射：
 
 ```yaml
 ports:
@@ -130,23 +130,23 @@ ports:
 
 ```bash
 # 查看后端错误
-docker-compose logs antd-gin-backend
+docker compose logs antd-gin-backend
 
 # 查看前端错误
-docker-compose logs antd-gin-frontend
+docker compose logs antd-gin-frontend
 
 # 查看数据库连接
-docker-compose logs antd-gin-postgres
+docker compose logs antd-gin-postgres
 ```
 
 ### 3. 重启服务
 
 ```bash
 # 重启所有服务
-docker-compose restart
+docker compose restart
 
 # 重启特定服务
-docker-compose restart antd-gin-backend
+docker compose restart antd-gin-backend
 ```
 
 ### 4. 进入容器调试
