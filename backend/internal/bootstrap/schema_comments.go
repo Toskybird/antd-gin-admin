@@ -126,6 +126,23 @@ var schemaComments = []tableComment{
 			"created_at": "创建时间",
 		},
 	},
+	{
+		table:   "sys_email_alert_config",
+		comment: "邮件告警约定，全系统唯一一份",
+		columns: map[string]string{
+			"id":              "主键，固定为 1",
+			"enabled":         "是否启用",
+			"host":            "邮件服务器主机",
+			"port":            "邮件服务器端口",
+			"encryption":      "加密方式：none、starttls、ssl",
+			"username":        "认证用户名",
+			"password":        "SMTP 密码，明文存储",
+			"sender_name":     "发件人显示名",
+			"sender_address":  "发件人地址",
+			"recipients_json": "收件人邮箱 JSON 数组",
+			"updated_at":      "更新时间",
+		},
+	},
 }
 
 // ApplySchemaComments applies table and column comments after AutoMigrate.

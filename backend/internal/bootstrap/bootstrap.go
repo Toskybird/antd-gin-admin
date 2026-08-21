@@ -30,6 +30,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&entity.RoleMenu{},
 		&entity.RoleDept{},
 		&entity.OperationLog{},
+		&entity.EmailAlertConfig{},
 	)
 }
 
@@ -238,6 +239,44 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 			Perms:      "system:operation-log:list",
 			Status:     1,
 			SortOrder:  35,
+		},
+		{
+			MenuCode:   "system-email-alert",
+			ParentCode: "system",
+			MenuName:   "邮件告警",
+			MenuType:   "C",
+			Path:       "/system/email-alert",
+			Component:  "/system/email-alert",
+			Perms:      "system:email-alert:list",
+			Status:     1,
+			SortOrder:  36,
+		},
+		{
+			MenuCode:   "system-email-alert-update",
+			ParentCode: "system-email-alert",
+			MenuName:   "邮件告警配置",
+			MenuType:   "F",
+			Perms:      "system:email-alert:update",
+			Status:     1,
+			SortOrder:  3601,
+		},
+		{
+			MenuCode:   "system-email-alert-resend",
+			ParentCode: "system-email-alert",
+			MenuName:   "重新发送",
+			MenuType:   "F",
+			Perms:      "system:email-alert:resend",
+			Status:     1,
+			SortOrder:  3602,
+		},
+		{
+			MenuCode:   "system-email-alert-delete",
+			ParentCode: "system-email-alert",
+			MenuName:   "删除告警记录",
+			MenuType:   "F",
+			Perms:      "system:email-alert:delete",
+			Status:     1,
+			SortOrder:  3603,
 		},
 		{
 			MenuCode:  "system-monitor",
@@ -481,7 +520,7 @@ func EnsureRBACSeed(db *gorm.DB, cfg *config.Config) error {
 	seedMenuSort := map[string]int{
 		"welcome": 10, "dashboard": 20, "system": 30, "system-monitor": 40,
 		"system-user": 31, "system-role": 32, "system-menu": 33, "system-dept": 34,
-		"system-operation-log": 35, "monitor-online-users": 41, "monitor-service": 42,
+		"system-operation-log": 35, "system-email-alert": 36, "monitor-online-users": 41, "monitor-service": 42,
 		"system-cache": 43, "system-data-manage": 44,
 	}
 	for code, ord := range seedMenuSort {
