@@ -1,0 +1,31 @@
+stages:
+  - test
+
+# 任意分支 push、Merge Request（PR）都会跑；已有开放 MR 时跳过同分支的 push 流水线，避免重复。
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+variables:
+  GOPROXY: https://goproxy.cn,https://proxy.golang.org,direct
+  GOPATH: $CI_PROJECT_DIR/.go
+  GOCACHE: $CI_PROJECT_DIR/.cache/go-build
+
+backend_test:
+  stage: test
+  image: golang:1.24
+  interruptible: true
+  cache:
+    key:
+      files:
+        - backend/go.sum
+    paths:
+      - .go
+      - .cache/go-build
+  script:
+    - cd backend
+    - go test ./...
