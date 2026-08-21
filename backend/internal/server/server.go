@@ -20,6 +20,7 @@ import (
 	dataManageSvc "antd-gin-admin-backend/internal/service/data_manage"
 	dataScopeSvc "antd-gin-admin-backend/internal/service/data_scope"
 	deptsvc "antd-gin-admin-backend/internal/service/dept"
+	emailalertsvc "antd-gin-admin-backend/internal/service/email_alert"
 	serviceInterfaces "antd-gin-admin-backend/internal/service/interfaces"
 	menusvc "antd-gin-admin-backend/internal/service/menu"
 	monitorsvc "antd-gin-admin-backend/internal/service/monitor"
@@ -93,6 +94,7 @@ func Run(cfg *config.Config) error {
 	var roleMenuRepo repoInterfaces.RoleMenuRepository
 	var roleDeptRepo repoInterfaces.RoleDeptRepository
 	var operationLogRepo repoInterfaces.OperationLogRepository
+	var emailAlertRepo repoInterfaces.EmailAlertRepository
 	var dbMetaRepo repoInterfaces.DBMetaRepository
 	if cfg.Auth.UseMock {
 		authRepo = repoMock.NewAuthMockRepository()
@@ -106,6 +108,7 @@ func Run(cfg *config.Config) error {
 		roleMenuRepo = repoDB.NewRoleMenuRepository(db)
 		roleDeptRepo = repoDB.NewRoleDeptRepository(db)
 		operationLogRepo = repoDB.NewOperationLogRepository(db)
+		emailAlertRepo = repoDB.NewEmailAlertRepository(db)
 		dbMetaRepo = repoDB.NewDBMetaRepository(db)
 	}
 	authSvc := authsvc.New(authRepo, cfg.JWT.Secret, cfg.JWT.Issuer, cfg.JWT.ExpireTime)
@@ -163,11 +166,15 @@ func Run(cfg *config.Config) error {
 		monitorSvcVar = monitorsvc.New(redisClient, 10*time.Minute, db, time.Duration(cfg.JWT.ExpireTime)*time.Second)
 	}
 	cacheSvcVar := cachesvc.New(redisClient)
+	var emailAlertSvcVar serviceInterfaces.EmailAlertService
+	if emailAlertRepo != nil {
+		emailAlertSvcVar = emailalertsvc.New(emailAlertRepo)
+	}
 	authMiddleware := middleware.Auth(cfg.JWT.Secret, monitorSvcVar)
 
 	api := engine.Group("/api/v1")
 	{
-		system.RegisterRoutes(api, authSvc, authMiddleware, permissionSvcVar, dataScopeSvcVar, profileSvc, userSvc, roleSvc, menuSvc, deptSvc, userRoleSvcVar, roleMenuSvcVar, roleDeptSvcVar, operationLogSvcVar, monitorSvcVar, dataManageSvcVar, cacheSvcVar)
+		system.RegisterRoutes(api, authSvc, authMiddleware, permissionSvcVar, dataScopeSvcVar, profileSvc, userSvc, roleSvc, menuSvc, deptSvc, userRoleSvcVar, roleMenuSvcVar, roleDeptSvcVar, operationLogSvcVar, monitorSvcVar, dataManageSvcVar, cacheSvcVar, emailAlertSvcVar)
 	}
 
 	port := cfg.Server.Port

@@ -16,7 +16,7 @@ import (
 )
 
 // RegisterRoutes wires system routes under /system.
-func RegisterRoutes(rg *gin.RouterGroup, authSvc interfaces.AuthService, authMiddleware gin.HandlerFunc, permissionSvc interfaces.PermissionService, dataScopeSvc interfaces.DataScopeService, profileSvc interfaces.ProfileService, userSvc interfaces.UserService, roleSvc interfaces.RoleService, menuSvc interfaces.MenuService, deptSvc interfaces.DeptService, userRoleSvc interfaces.UserRoleService, roleMenuSvc interfaces.RoleMenuService, roleDeptSvc interfaces.RoleDeptService, operationLogSvc interfaces.OperationLogService, monitorSvc interfaces.MonitorService, dataManageSvc interfaces.DataManageService, cacheSvc interfaces.CacheService) {
+func RegisterRoutes(rg *gin.RouterGroup, authSvc interfaces.AuthService, authMiddleware gin.HandlerFunc, permissionSvc interfaces.PermissionService, dataScopeSvc interfaces.DataScopeService, profileSvc interfaces.ProfileService, userSvc interfaces.UserService, roleSvc interfaces.RoleService, menuSvc interfaces.MenuService, deptSvc interfaces.DeptService, userRoleSvc interfaces.UserRoleService, roleMenuSvc interfaces.RoleMenuService, roleDeptSvc interfaces.RoleDeptService, operationLogSvc interfaces.OperationLogService, monitorSvc interfaces.MonitorService, dataManageSvc interfaces.DataManageService, cacheSvc interfaces.CacheService, emailAlertSvc interfaces.EmailAlertService) {
 	r := rg.Group("/system")
 	r.GET("/ping", ping)
 	r.GET("/health", health)
@@ -59,6 +59,7 @@ func RegisterRoutes(rg *gin.RouterGroup, authSvc interfaces.AuthService, authMid
 		registerDashboardRoutes(protected, permissionSvc, operationLogSvc)
 		registerDataManageRoutes(protected, dataManageSvc)
 		registerCacheRoutes(protected, permissionSvc, cacheSvc)
+		registerEmailAlertRoutes(protected, permissionSvc, emailAlertSvc)
 	}
 }
 

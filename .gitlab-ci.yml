@@ -1,0 +1,27 @@
+stages:
+  - test
+
+# 仅在 Merge Request（PR）时跑。
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+variables:
+  GOPROXY: https://goproxy.cn,https://proxy.golang.org,direct
+  GOPATH: $CI_PROJECT_DIR/.go
+  GOCACHE: $CI_PROJECT_DIR/.cache/go-build
+
+backend_test:
+  stage: test
+  image: golang:1.24
+  interruptible: true
+  cache:
+    key:
+      files:
+        - backend/go.sum
+    paths:
+      - .go
+      - .cache/go-build
+  script:
+    - cd backend
+    - go test ./...
