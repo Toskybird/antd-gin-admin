@@ -143,6 +143,24 @@ var schemaComments = []tableComment{
 			"updated_at":      "更新时间",
 		},
 	},
+	{
+		table:   "sys_email_alert_records",
+		comment: "告警记录，与失败操作日志一对一",
+		columns: map[string]string{
+			"id":                  "主键",
+			"operation_log_id":    "操作日志 ID",
+			"username":            "快照用户名",
+			"module":              "快照模块",
+			"action":              "快照动作",
+			"path":                "快照路径",
+			"error_msg":           "快照错误信息",
+			"occurred_at":         "操作发生时间",
+			"send_status":         "发送成功或发送失败",
+			"send_failure_reason": "最近一次发送失败原因",
+			"created_at":          "创建时间",
+			"updated_at":          "更新时间",
+		},
+	},
 }
 
 // ApplySchemaComments applies table and column comments after AutoMigrate.

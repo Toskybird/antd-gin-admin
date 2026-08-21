@@ -12,20 +12,31 @@ import (
 
 // Service implements OperationLogService.
 type Service struct {
-	repo repointerfaces.OperationLogRepository
+	repo    repointerfaces.OperationLogRepository
+	alerter serviceinterfaces.EmailAlertService
 }
 
 // New creates a new OperationLogService.
-func New(repo repointerfaces.OperationLogRepository) serviceinterfaces.OperationLogService {
-	return &Service{repo: repo}
+func New(repo repointerfaces.OperationLogRepository, alerter serviceinterfaces.EmailAlertService) serviceinterfaces.OperationLogService {
+	return &Service{repo: repo, alerter: alerter}
 }
 
-// Create writes a new operation log.
+// Create writes a new operation log, then asynchronously notifies 邮件告警 (ADR-0005).
 func (s *Service) Create(ctx context.Context, log *entity.OperationLog) error {
 	if log == nil {
 		return nil
 	}
-	return s.repo.Create(ctx, log)
+	if err := s.repo.Create(ctx, log); err != nil {
+		return err
+	}
+	if log.Status != 0 || s.alerter == nil {
+		return nil
+	}
+	entry := *log
+	go func() {
+		_ = s.alerter.NotifyFailedOperation(context.WithoutCancel(ctx), &entry)
+	}()
+	return nil
 }
 
 // Page queries operation logs with pagination.

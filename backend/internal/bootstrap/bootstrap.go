@@ -31,6 +31,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&entity.RoleDept{},
 		&entity.OperationLog{},
 		&entity.EmailAlertConfig{},
+		&entity.EmailAlertRecord{},
 	)
 }
 

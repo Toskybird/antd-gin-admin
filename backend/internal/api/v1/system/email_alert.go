@@ -22,6 +22,9 @@ func registerEmailAlertRoutes(rg *gin.RouterGroup, permissionSvc interfaces.Perm
 	rg.PUT("/email-alert", middleware.RequirePermission(permissionSvc, "system:email-alert:update"), func(c *gin.Context) {
 		saveEmailAlert(c, alertSvc)
 	})
+	rg.GET("/email-alert/records", middleware.RequirePermission(permissionSvc, "system:email-alert:list"), func(c *gin.Context) {
+		listEmailAlertRecords(c, alertSvc)
+	})
 }
 
 func getEmailAlert(c *gin.Context, alertSvc interfaces.EmailAlertService) {
@@ -45,4 +48,28 @@ func saveEmailAlert(c *gin.Context, alertSvc interfaces.EmailAlertService) {
 		return
 	}
 	response.Success(c, vo.BuildEmailAlertVO(cfg))
+}
+
+func listEmailAlertRecords(c *gin.Context, alertSvc interfaces.EmailAlertService) {
+	var req dto.EmailAlertRecordPageRequest
+	req.Page = 1
+	req.PageSize = 10
+	if err := c.ShouldBindQuery(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "参数错误")
+		return
+	}
+	result, err := alertSvc.PageRecords(c, &req)
+	if err != nil {
+		writeServiceError(c, err)
+		return
+	}
+	if result == nil {
+		result = &vo.PageResult[vo.EmailAlertRecordVO]{
+			Items: []*vo.EmailAlertRecordVO{},
+			Page:  req.Page,
+			Size:  req.PageSize,
+			Total: 0,
+		}
+	}
+	response.Success(c, result)
 }

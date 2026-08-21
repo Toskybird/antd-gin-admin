@@ -19,6 +19,38 @@ type EmailAlertVO struct {
 	Recipients         []string `json:"recipients"`
 }
 
+// EmailAlertRecordVO is a public 告警记录 (no pending send state).
+type EmailAlertRecordVO struct {
+	ID                int64  `json:"id"`
+	OperationLogID    int64  `json:"operation_log_id"`
+	Username          string `json:"username"`
+	Module            string `json:"module"`
+	Action            string `json:"action"`
+	Path              string `json:"path"`
+	ErrorMsg          string `json:"error_msg"`
+	OccurredAt        int64  `json:"occurred_at"`
+	SendStatus        string `json:"send_status"`
+	SendFailureReason string `json:"send_failure_reason"`
+}
+
+func BuildEmailAlertRecordVO(rec *entity.EmailAlertRecord) *EmailAlertRecordVO {
+	if rec == nil {
+		return nil
+	}
+	return &EmailAlertRecordVO{
+		ID:                rec.ID,
+		OperationLogID:    rec.OperationLogID,
+		Username:          rec.Username,
+		Module:            rec.Module,
+		Action:            rec.Action,
+		Path:              rec.Path,
+		ErrorMsg:          rec.ErrorMsg,
+		OccurredAt:        rec.OccurredAt.Unix(),
+		SendStatus:        rec.SendStatus,
+		SendFailureReason: rec.SendFailureReason,
+	}
+}
+
 func BuildEmailAlertVO(cfg *entity.EmailAlertConfig) *EmailAlertVO {
 	if cfg == nil {
 		return &EmailAlertVO{Recipients: []string{}}

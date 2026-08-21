@@ -76,7 +76,7 @@ func setupEmailAlertRouter(t *testing.T, perms []string) *gin.Engine {
 	permSvc := &stubPermissionService{perms: map[string][]string{
 		emailAlertOperator: perms,
 	}}
-	alertSvc := emailalertsvc.New(repoDB.NewEmailAlertRepository(db))
+	alertSvc := emailalertsvc.New(repoDB.NewEmailAlertRepository(db), nil, nil)
 
 	router := gin.New()
 	api := router.Group("/api/v1")

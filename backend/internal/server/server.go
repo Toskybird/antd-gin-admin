@@ -11,6 +11,7 @@ import (
 	"antd-gin-admin-backend/internal/api/v1/system"
 	"antd-gin-admin-backend/internal/bootstrap"
 	"antd-gin-admin-backend/internal/config"
+	"antd-gin-admin-backend/internal/mailer"
 	"antd-gin-admin-backend/internal/middleware"
 	repoDB "antd-gin-admin-backend/internal/repository/db"
 	repoInterfaces "antd-gin-admin-backend/internal/repository/interfaces"
@@ -95,6 +96,7 @@ func Run(cfg *config.Config) error {
 	var roleDeptRepo repoInterfaces.RoleDeptRepository
 	var operationLogRepo repoInterfaces.OperationLogRepository
 	var emailAlertRepo repoInterfaces.EmailAlertRepository
+	var emailAlertRecordRepo repoInterfaces.EmailAlertRecordRepository
 	var dbMetaRepo repoInterfaces.DBMetaRepository
 	if cfg.Auth.UseMock {
 		authRepo = repoMock.NewAuthMockRepository()
@@ -109,6 +111,7 @@ func Run(cfg *config.Config) error {
 		roleDeptRepo = repoDB.NewRoleDeptRepository(db)
 		operationLogRepo = repoDB.NewOperationLogRepository(db)
 		emailAlertRepo = repoDB.NewEmailAlertRepository(db)
+		emailAlertRecordRepo = repoDB.NewEmailAlertRecordRepository(db)
 		dbMetaRepo = repoDB.NewDBMetaRepository(db)
 	}
 	authSvc := authsvc.New(authRepo, cfg.JWT.Secret, cfg.JWT.Issuer, cfg.JWT.ExpireTime)
@@ -153,9 +156,6 @@ func Run(cfg *config.Config) error {
 		roleDeptSvcVar = roleDeptSvc.New(roleDeptRepo)
 	}
 	var operationLogSvcVar serviceInterfaces.OperationLogService
-	if operationLogRepo != nil {
-		operationLogSvcVar = operationlogsvc.New(operationLogRepo)
-	}
 	var dataManageSvcVar serviceInterfaces.DataManageService
 	if dbMetaRepo != nil {
 		dataManageSvcVar = dataManageSvc.New(dbMetaRepo, cfg.Database.Username, cfg.Database.Password)
@@ -168,7 +168,10 @@ func Run(cfg *config.Config) error {
 	cacheSvcVar := cachesvc.New(redisClient)
 	var emailAlertSvcVar serviceInterfaces.EmailAlertService
 	if emailAlertRepo != nil {
-		emailAlertSvcVar = emailalertsvc.New(emailAlertRepo)
+		emailAlertSvcVar = emailalertsvc.New(emailAlertRepo, emailAlertRecordRepo, mailer.NewSMTPSender())
+	}
+	if operationLogRepo != nil {
+		operationLogSvcVar = operationlogsvc.New(operationLogRepo, emailAlertSvcVar)
 	}
 	authMiddleware := middleware.Auth(cfg.JWT.Secret, monitorSvcVar)
 
